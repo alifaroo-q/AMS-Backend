@@ -25,9 +25,9 @@ import { DoesEmailExist } from './auth/dto/DoesEmailExists';
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: 'postgres',
       host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT) || 3306,
+      port: parseInt(process.env.DB_PORT) || 5432,
       username: process.env.DB_USER,
       password: process.env.DB_PASS,
       database: process.env.DB_NAME || 'ams_dev',
