@@ -1,0 +1,30 @@
+nest new project-name
+npm install --save @nestjs/typeorm typeorm mysql2
+npm install --save @nestjs/passport passport passport-local
+npm install --save-dev @types/passport-local (Importing types for any strategy we use)
+--for using session-- npm install express-session
+--for using tokens-- npm install --save @nestjs/jwt passport-jw
+npm install --save-dev @types/passport-jwt (Importing types for any strategy we use)
+npm install class-validator --save (For Database TypeOrm Class Validation)
+https://github.com/typestack/class-validator
+$ npm i --save class-transformer (For Api Request Validation)
+https://docs.nestjs.com/techniques/validation
+
+
+## cli rest apis
+Create a User.ts file in orm -> entities
+[
+nest g module users
+nest g controller /users/controllers/users
+nest g service /users/services/users
+] or 
+*** nest g resource user *** (import orm entities in services & module both)
+
+## typeorm: methods apis 
+https://orkhan.gitbook.io/typeorm/docs/repository-api
+
+## email
+npm install --save @nestjs-modules/mailer nodemailer
+npm install --save-dev @types/nodemailer
+npm install --save handlebars
+
