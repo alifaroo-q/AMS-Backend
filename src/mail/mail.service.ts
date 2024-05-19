@@ -1,14 +1,45 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { auth } from '@googleapis/oauth2';
 import { Options } from 'nodemailer/lib/smtp-transport';
-//import { ConfigService } from '@nestjs/config';
+
+import * as SendGrid from '@sendgrid/mail';
+
+const EMAIL_CONFIRMATION_TEMPLATE: string =
+  'd-4759f0a5731b4f2888f92ff24843b719';
+
 @Injectable()
 export class MailService {
-  constructor(
-    //private readonly configService: ConfigService,
-    private readonly mailerService: MailerService,
-  ) {}
+  private logger = new Logger('MailService');
+
+  constructor(private readonly mailerService: MailerService) {
+    SendGrid.setApiKey(process.env.SENDGRID_API_KEY);
+  }
+
+  private async sendGridMail(mail: SendGrid.MailDataRequired) {
+    try {
+      return await SendGrid.send(mail);
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  public async sendTestMail() {
+    return await this.sendGridMail({
+      to: 'alifarooq122@gmail.com',
+      subject: 'testing',
+      from: 'se201027@dsu.edu.pk',
+      templateId: 'd-4759f0a5731b4f2888f92ff24843b719',
+      text: 'Test mail',
+      html: 'Verify email',
+      dynamicTemplateData: {
+        token: 'fslkfsjfkls',
+        domain: 'dsu.edu.pk',
+        username: 'test',
+        link: 'dsu.edu.pk',
+      },
+    });
+  }
 
   private async setTransport() {
     const OAuth2 = auth.OAuth2;
@@ -76,24 +107,15 @@ export class MailService {
 
   public async sendVerificationEmail(to: string, token: string, type: string) {
     try {
-      await this.setTransport();
-    } catch (err) {
-      console.log(err);
-      console.log('Email HALT');
-      return;
-    }
-    this.mailerService
-      .sendMail({
-        transporterName: 'gmail',
-        to: 'se201003@dsu.edu.pk,gosaad@outlook.com', //to,
-        from: 'DSU Alumni Portal <no-reply@dsu.edu.pk>',
+      const response = await this.sendGridMail({
+        to,
+        from: 'se201027@dsu.edu.pk',
         subject:
           type === 'internal'
             ? 'Registration: Alumni Verification'
             : 'Registration: Email Verification',
-        template: 'AlumniUniEmail', // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
-        context: {
-          // Data to be sent to template engine.
+        templateId: EMAIL_CONFIRMATION_TEMPLATE,
+        dynamicTemplateData: {
           token,
           username: 'Alumni Name',
           domain: process.env.DOMAIN || 'https://alumni.dsu.edu.pk',
@@ -102,13 +124,12 @@ export class MailService {
               ? '/registrations/validateUniEmail'
               : '/registrations/validateAccountEmail',
         },
-      })
-      .then((success) => {
-        console.log(success);
-      })
-      .catch((err) => {
-        console.log(err);
       });
+
+      this.logger.log(response);
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   public async sendPasswordConfirmationEmail(to: string, token: string) {

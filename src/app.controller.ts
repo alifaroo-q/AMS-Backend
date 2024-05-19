@@ -126,6 +126,6 @@ export class AppController {
 
   @Post('sendMail/:email')
   sendMail(@Param('email') email: string) {
-    return this.mailService.sendMail(email);
+    return this.mailService.sendTestMail();
   }
 }
