@@ -124,8 +124,11 @@ export class AppController {
     return `This is a deployed Service Message`;
   }
 
-  // @Post('sendMail/:email')
-  // sendMail(@Param('email') email: string) {
-  //   return this.mailService.sendTestMail();
-  // }
+  @Post('sendMail/:email')
+  sendMail(@Param('email') email: string) {
+    return this.mailService.sendPasswordConfirmationEmail(
+      'alifarooq122@gmail.com',
+      'lksfjsklfjsf',
+    );
+  }
 }
