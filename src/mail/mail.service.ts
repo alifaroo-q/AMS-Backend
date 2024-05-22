@@ -31,6 +31,7 @@ export class MailService {
             ? 'Registration: Alumni Verification'
             : 'Registration: Email Verification',
         templateId: EMAIL_CONFIRMATION_TEMPLATE,
+        html: 'Email Confirmation',
         dynamicTemplateData: {
           token,
           username: 'Alumni Name',
@@ -55,6 +56,7 @@ export class MailService {
         from: process.env.MAIL_FROM,
         subject: 'Password Change Request Confirmation',
         templateId: PASSWORD_CHANGE_TEMPLATE,
+        html: 'Password Change Confirmation',
         dynamicTemplateData: {
           token,
           username: 'Alumni Name',
