@@ -13,17 +13,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  // anything that is returned will be save in request.user
   async validate(payload: any) {
     const user = await this.userService.findOne(payload.sub);
     return {
-      // user from database
       sub: payload.sub,
       eml: payload.email,
       sys: payload.sys,
       iat: payload.iat,
       exp: payload.exp,
       sts: 'verified',
+      role: payload.role_id,
       human:
         new Date(payload.iat * 1000).toString() +
         '-----to-----' +

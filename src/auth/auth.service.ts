@@ -16,30 +16,29 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userService.findByEmail(email);
     if (user && user.password === password) {
-      const { password, ...rest } = user;
-      return rest;
+      const { password, ...remainingProperties } = user;
+      return remainingProperties;
     }
     return null;
   }
 
   async login(user: any) {
     const payload = {
-      //name: [user.first_name, user.middle_name, user.last_name].join(' '),
       sub: user.id,
       email: user.email,
       sys: 'AMS',
-      //iat: date.getTime(), by default its added in payload
-      //exp: date.getTime() + 5 * 24 * 60 * 60 * 1000, by default its added in payload
+      role_id: user.role,
     };
     return { access_token: this.jwtService.sign(payload) };
   }
 
   async applyResetPassword(applyPasswordReset: ApplyResetPasswordDto) {
     const user = await this.userService.findByEmail(applyPasswordReset.email);
-    const my_token = this.genToken(40);
-    console.log('Waiting..');
-    await this.mailService.sendPasswordConfirmationEmail(user.email, my_token);
-    this.userService.updatePasswordToken(user.id, my_token);
+    const token = this.genToken(40);
+
+    await this.mailService.sendPasswordConfirmationEmail(user.email, token);
+    await this.userService.updatePasswordToken(user.id, token);
+
     return {
       message: 'Password Reset Request Sent',
     };
@@ -47,17 +46,17 @@ export class AuthService {
 
   async resetPassword(token: string, resetPassDto: ResetPasswordDto) {
     const user = await this.userService.findByToken(token);
-    if (user) {
-      let res = await this.userService.updatePassword(
-        user.id,
-        resetPassDto.password,
-      );
-      return res;
-    } else
+
+    if (!user)
       throw new HttpException(
         'User not found with token: ' + token,
         HttpStatus.BAD_REQUEST,
       );
+
+    return await this.userService.updatePassword(
+      user.id,
+      resetPassDto.password,
+    );
   }
 
   genToken(size: number) {

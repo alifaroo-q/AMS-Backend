@@ -6,7 +6,7 @@ export default class {
   private workDir = constants.UPLOAD_LOCATION;
 
   createAlumniFolder(createdUser: any) {
-    let dir = this.workDir + createdUser.id; //path;
+    const dir = this.workDir + createdUser.id; //path;
     //console.log(dir);
     if (!this.fs.existsSync(dir)) {
       this.fs.mkdirSync(dir, { recursive: true });

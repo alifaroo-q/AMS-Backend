@@ -20,6 +20,7 @@ import { Registration } from './registrations/entities/registration.entity';
 import { SurveyModule } from './survey/survey.module';
 import { Survey } from './survey/entities/survey.entity';
 import { DoesEmailExist } from './auth/dto/DoesEmailExists';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { DoesEmailExist } from './auth/dto/DoesEmailExists';
     MailModule,
     RegistrationsModule,
     SurveyModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

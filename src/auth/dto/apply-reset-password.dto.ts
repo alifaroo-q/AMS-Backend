@@ -8,7 +8,6 @@ export class ApplyResetPasswordDto {
     description: 'Account Email / Verification Email',
     example: 'saad@outlook.com',
   })
-  //@IsEmail()
   @IsNotEmpty()
   @IsEmail()
   @EmailExist({

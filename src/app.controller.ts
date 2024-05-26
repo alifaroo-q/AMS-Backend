@@ -10,16 +10,13 @@ import {
 } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { AppService } from './app.service';
 import { AuthService } from './auth/auth.service';
-import { AuthUser } from './auth/decorator/user.decorator';
 import { ApplyResetPasswordDto } from './auth/dto/apply-reset-password.dto';
 import { LoginDto } from './auth/dto/login.dto';
 import { ResetPasswordDto } from './auth/dto/reset-password.dto';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { MailService } from './mail/mail.service';
-import { User } from './users/entities/users.entity';
 
 // const user = {
 //   sub: 39,
@@ -43,11 +40,9 @@ import { User } from './users/entities/users.entity';
 export class AppController {
   constructor(
     private readonly authService: AuthService,
-    //private readonly appService: AppService,
     private readonly mailService: MailService,
   ) {}
 
-  //POST /login
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiOkResponse({
@@ -57,32 +52,19 @@ export class AppController {
   @ApiBadRequestResponse({
     description: 'Authentication Failed',
   })
-  //  login(@Req() req: Request): Promise<{ access_token: string }> { // adding @Body tag just for swagger docs
-  login(@Req() req: Request, @Body() loginDto: LoginDto) {
-    console.log(req); //local strategy return the user after validating it
-    // TODO: return JWT access Token once user is validated
+  login(
+    @Req() req: Request,
+    @Body() loginDto: LoginDto,
+  ): Promise<{ access_token: string }> {
     return this.authService.login(req.user);
   }
-  /*
-  //GET /protected (after login & if not login show error)
-  @UseGuards(JwtAuthGuard)
-  @Get('protected')
-  getHello(@Req() req: Request): any {
-    //TODO: require bearer token + a validate token
-    console.log(req);
-    return req.user;
-    //return this.appService.getHello();
-  }
-  */
+
   @Post('applyPasswordReset')
   @ApiOkResponse({
     description: 'Reset Password',
     type: Promise<{ reset_token: string }>,
   })
-  //  login(@Req() req: Request): Promise<{ access_token: string }> { // adding @Body tag just for swagger docs
   applyResetPassword(@Body() applyPasswordReset: ApplyResetPasswordDto) {
-    //console.log(req); //local strategy return the user after validating it
-    // TODO: return JWT access Token once user is validated
     return this.authService.applyResetPassword(applyPasswordReset);
   }
 
@@ -91,13 +73,10 @@ export class AppController {
     description: 'Reset Password',
     type: typeof true,
   })
-  //  login(@Req() req: Request): Promise<{ access_token: string }> { // adding @Body tag just for swagger docs
   resetPassword(
     @Query('token') token: string,
     @Body() resetPassDto: ResetPasswordDto,
   ) {
-    //console.log(req); //local strategy return the user after validating it
-    // TODO: return JWT access Token once user is validated
     return this.authService.resetPassword(token, resetPassDto);
   }
 
@@ -107,8 +86,8 @@ export class AppController {
   getHello(@Req() req: any): any {
     const user = req.user;
     console.log(user);
-    const { sub, eml, sys, sts, iat, exp } = user;
-    return { sub, eml, sys, sts, iat, exp };
+    const { sub, eml, sys, sts, iat, exp, role } = user;
+    return { sub, eml, sys, sts, iat, exp, role };
   }
 
   @Get()
@@ -117,11 +96,6 @@ export class AppController {
     " https://ams-service-production.up.railway.app/api " 
     is no longer active, the new root url is : => 
     " https://amsbackend-ghub.onrender.com/api "`;
-  }
-
-  @Get('message')
-  message() {
-    return `This is a deployed Service Message`;
   }
 
   @Post('sendMail/:email')

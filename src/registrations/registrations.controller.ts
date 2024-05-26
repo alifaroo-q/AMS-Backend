@@ -169,8 +169,20 @@ export class RegistrationsController {
   }
 
   @Post('verifyUniversityEmail')
-  sendMail(@Body() verifyUniEmailDta: VerifyUniEmailDto) {
+  verifyUniversityEmailWithUniversityId(
+    @Body() verifyUniEmailDta: VerifyUniEmailDto,
+  ) {
     return this.registrationsService.verifyUniEmail(verifyUniEmailDta);
+  }
+
+  @Get('validateUniEmail')
+  @ApiOkResponse({
+    description: 'Validate the token',
+    type: 'ok validated',
+  })
+  @ApiBadRequestResponse({ description: 'Invalid Token' })
+  validateUniEmail(@Query('token') token: string) {
+    return this.registrationsService.validateUniEmail(token);
   }
 
   @Post('getUniversityEmailTokenData')
@@ -183,29 +195,9 @@ export class RegistrationsController {
     return this.registrationsService.getUniEmailTokenData(tokenData);
   }
 
-  @Get('validateUniEmail')
-  @ApiOkResponse({
-    description: 'Validate the token',
-    type: 'ok validated',
-  })
-  @ApiBadRequestResponse({ description: 'Invalid Token' })
-  validate(@Query('token') token: string) {
-    return this.registrationsService.validateUniEmail(token);
-  }
-
   @Post('registerAccount')
   sendAccountRequest(@Body() verifyNewAccountDto: VerifyNewAccountDto) {
     return this.registrationsService.verifyNewAccountEmail(verifyNewAccountDto);
-  }
-
-  @Post('getEmailTokenData')
-  @ApiOkResponse({
-    description: 'Token is Valid',
-    type: User,
-  })
-  @ApiBadRequestResponse({ description: 'Invalid Token or Not Verified' })
-  getEmailTokenData(@Body() tokenData: TokenDto) {
-    return this.registrationsService.getNewAccountTokenData(tokenData);
   }
 
   @Get('validateAccountEmail')
@@ -216,6 +208,16 @@ export class RegistrationsController {
   @ApiBadRequestResponse({ description: 'Invalid Token' })
   validateEmail(@Query('token') token: string) {
     return this.registrationsService.validateNewAccountEmail(token);
+  }
+
+  @Post('getEmailTokenData')
+  @ApiOkResponse({
+    description: 'Token is Valid',
+    type: User,
+  })
+  @ApiBadRequestResponse({ description: 'Invalid Token or Not Verified' })
+  getEmailTokenData(@Body() tokenData: TokenDto) {
+    return this.registrationsService.getNewAccountTokenData(tokenData);
   }
 
   @Get('getStepWithId/:roll_number')

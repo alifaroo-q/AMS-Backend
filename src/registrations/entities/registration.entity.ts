@@ -55,10 +55,10 @@ export class Registration {
   graduation_time: Date;
 
   @ApiProperty({ description: 'cgpa', example: '3.7' })
-  @Column()
+  @Column({ type: 'float' })
   cgpa: number;
 
-  @ApiProperty({ description: 'Registartion Step', example: '0' })
+  @ApiProperty({ description: 'Registration Step', example: '0' })
   @Column({ default: 0 })
   step: number;
 

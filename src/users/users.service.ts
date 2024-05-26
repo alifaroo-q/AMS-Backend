@@ -22,22 +22,15 @@ export class UserService {
       role: 2,
     });
 
-    // const errors = await validate(newUser);
-    // console.log(userDetails);
-    // console.log(errors);
-
-    // if (errors.length > 0)
-    //   throw new HttpException(
-    //     'Validation failed!',
-    //     HttpStatus.EXPECTATION_FAILED,
-    //   );
     const createdUser = await this.userRepository.save(newUser);
-    if (this.fileHelper.createAlumniFolder(createdUser)) return createdUser;
-    else
+
+    if (!this.fileHelper.createAlumniFolder(createdUser))
       throw new HttpException(
         'Something Went Wrong - Folder Write failed!',
         HttpStatus.FORBIDDEN,
       );
+
+    return createdUser;
   }
 
   findAll() {
@@ -95,13 +88,15 @@ export class UserService {
   }
 
   async findOneWithProfile(id: number) {
-    //const user = await this.userRepository.findOneBy({ id }); or
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['profile'],
     });
-    if (user) return user;
-    else throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+    if (!user)
+      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+    return user;
   }
 
   async findByEmail(email: string) {

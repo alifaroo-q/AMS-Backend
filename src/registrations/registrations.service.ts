@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/mail/mail.service';
 import { UserService } from 'src/users/users.service';
@@ -11,7 +10,6 @@ import { VerifyNewAccountDto } from './dto/verify-new-account.dto';
 import { VerifyUniEmailDto } from './dto/verify-uni-email.dto';
 import { Registration } from './entities/registration.entity';
 
-//https://orkhan.gitbook.io/typeorm/docs/repository-api
 @Injectable()
 export class RegistrationsService {
   constructor(
@@ -34,19 +32,19 @@ export class RegistrationsService {
   }
 
   async verifyUniEmail({ uni_reg_id }: VerifyUniEmailDto) {
-    let uni_email = uni_reg_id.toLowerCase() + '@dsu.edu.pk';
-    const my_token = this.genToken(40);
-    this.mailService.sendVerificationEmail(uni_email, my_token, 'internal');
+    const uni_email = uni_reg_id.toLowerCase() + '@dsu.edu.pk';
+    const token = this.genToken(40);
+
+    await this.mailService.sendVerificationEmail(uni_email, token, 'internal');
     await this.registrationRepository.increment(
       { uni_email },
       'uni_email_sent',
       1,
     );
-    await this.registrationRepository.update({ uni_email }, { step: 1 });
 
     await this.registrationRepository.update(
       { uni_email },
-      { uni_token: my_token },
+      { step: 1, uni_token: token },
     );
 
     //change this back once done with frontend
@@ -59,11 +57,13 @@ export class RegistrationsService {
     const reg_user = await this.registrationRepository.findOne({
       where: { uni_token: token, uni_verified: true },
     });
+
     if (!reg_user)
       throw new HttpException(
         'Invalid Token or Not Verified',
         HttpStatus.BAD_REQUEST,
       );
+
     const {
       uni_email_sent,
       uni_token,
@@ -73,63 +73,55 @@ export class RegistrationsService {
       email_verified,
       createdAt,
       updatedAt,
-      ...more
+      ...remainingProperties
     } = reg_user;
-    return more;
+
+    return remainingProperties;
   }
 
   async validateUniEmail(token: string) {
-    const res = await this.registrationRepository.findOneBy({
+    const userWithValidToken = await this.registrationRepository.findOneBy({
       uni_token: token,
     });
-    if (!res) throw new HttpException('Invalid Token', HttpStatus.BAD_REQUEST);
-    else {
-      await this.registrationRepository.update(
-        { id: res.id },
-        { uni_verified: true, step: 2 },
-      );
-      // const {
-      //   email_token,
-      //   email_verified,
-      //   email_sent,
-      //   uni_verified,
-      //   uni_token,
-      //   uni_email_sent,
-      //   createdAt,
-      //   updatedAt,
-      //   ...more
-      // } = res;
-      return 'Your University Email Account has been Verified please Proceed with the Registration';
-    }
+
+    if (!userWithValidToken)
+      throw new HttpException('Invalid Token', HttpStatus.BAD_REQUEST);
+
+    await this.registrationRepository.update(
+      { id: userWithValidToken.id },
+      { uni_verified: true, step: 2 },
+    );
+
+    return 'Your University Email Account has been Verified please Proceed with the Registration';
   }
 
   async verifyNewAccountEmail(verifyNewAccountDto: VerifyNewAccountDto) {
     //Register User
-    const registration = await this.registrationRepository.findOneBy({
-      id: verifyNewAccountDto.reg_id,
-    });
-    if (!registration)
+    const currentRegistrationUser = await this.registrationRepository.findOneBy(
+      {
+        id: verifyNewAccountDto.reg_id,
+      },
+    );
+
+    if (!currentRegistrationUser)
       throw new HttpException('Registration not found', HttpStatus.BAD_REQUEST);
 
-    const my_token = this.genToken(40);
+    const token = this.genToken(40);
 
-    const { id, first_name, middle_name, last_name, uni_email } = registration;
+    const { id, first_name, middle_name, last_name, uni_email } =
+      currentRegistrationUser;
+
     const { phone, email, password } = verifyNewAccountDto;
 
-    this.mailService.sendVerificationEmail(email, my_token, 'external');
-
+    await this.mailService.sendVerificationEmail(email, token, 'external');
     await this.registrationRepository.increment({ id }, 'email_sent', 1);
 
     await this.registrationRepository.update(
       { id },
-      { step: 3, email_token: my_token },
+      { step: 3, email_token: token },
     );
 
-    const {
-      password: pwd,
-      id: uid,
-      ...other
-    } = await this.userService.create({
+    const { id: uid } = await this.userService.create({
       uni_email,
       phone,
       first_name,
@@ -139,7 +131,7 @@ export class RegistrationsService {
       password,
     });
 
-    return { user_id: uid, token: my_token };
+    return { user_id: uid, token };
   }
 
   async getNewAccountTokenData({ token }: TokenDto) {
@@ -147,6 +139,7 @@ export class RegistrationsService {
     const reg_user = await this.registrationRepository.findOne({
       where: { email_token: token, email_verified: true },
     });
+
     if (!reg_user)
       throw new HttpException(
         'Invalid Token or Not Verified',
@@ -160,47 +153,25 @@ export class RegistrationsService {
       registration_status,
       createdAt,
       updatedAt,
-      ...more
+      ...remainingProperties
     } = await this.userService.findByUniEmail(reg_user.uni_email);
-    return more;
+
+    return remainingProperties;
   }
 
   async validateNewAccountEmail(token: string) {
     const res = await this.registrationRepository.findOneBy({
       email_token: token,
     });
-    if (!res) throw new HttpException('Invalid Token', HttpStatus.BAD_REQUEST);
-    else {
-      await this.registrationRepository.update(
-        { id: res.id },
-        { email_verified: true, step: 4 },
-      );
-      // const {
-      //   email_sent,
-      //   email_token,
-      //   email_verified,
-      //   uni_email_sent,
-      //   uni_token,
-      //   uni_verified,
-      //   createdAt,
-      //   updatedAt,
-      //   step,
-      //   id: regId,
-      //   ...more
-      // } = res;
-      // const { email, id: userId } = await this.userService.findByUniEmail(
-      //   more.uni_email,
-      // );
 
-      return 'Your Public Email Account has been Verified please Proceed with the Registration';
-      // return {
-      //   userId,
-      //   email,
-      //   regId,
-      //   ...more,
-      //   step: 4,
-      // };
-    }
+    if (!res) throw new HttpException('Invalid Token', HttpStatus.BAD_REQUEST);
+
+    await this.registrationRepository.update(
+      { id: res.id },
+      { email_verified: true, step: 4 },
+    );
+
+    return 'Your Public Email Account has been Verified please Proceed with the Registration';
   }
 
   findAll() {
@@ -219,11 +190,13 @@ export class RegistrationsService {
     return `This action removes a #${id} registration`;
   }
 
-  async getStepWithId(roll_number: string) {
-    let uni_email = roll_number.toLowerCase() + '@dsu.edu.pk';
+  async getStepWithId(reg_num: string) {
+    const uni_email = reg_num.toLowerCase() + '@dsu.edu.pk';
     const reg_user = await this.registrationRepository.findOneBy({ uni_email });
+
     if (!reg_user)
       throw new HttpException('Invalid roll number', HttpStatus.BAD_REQUEST);
+
     return { step: reg_user.step, id: reg_user.id };
   }
 }

@@ -1,15 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 import { UniEmailExists } from './DoesUniEmailExists';
-import { IsUniEmailUnique, UniEmailAvailable } from './IsUniEmailUnique';
 
 export class VerifyUniEmailDto {
   @ApiProperty({
-    //description: 'University Email / Verification Email',
     description: 'University Id / Verification Id',
     example: 'SE102293',
   })
-  //@IsEmail()
   @IsNotEmpty()
   @UniEmailExists({
     message:

@@ -16,8 +16,7 @@ export class DoesEmailExist implements ValidatorConstraintInterface {
   ) {}
   async validate(email: string, args: ValidationArguments) {
     const user = await this.userRepository.findOneBy({ email });
-    if (user) return true;
-    return false;
+    return !!user;
   }
 }
 

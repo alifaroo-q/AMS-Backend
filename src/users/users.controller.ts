@@ -1,23 +1,18 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  Put,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
   ParseIntPipe,
+  Patch,
+  Post,
+  Request,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
-  ParseFilePipe,
-  FileTypeValidator,
-  MaxFileSizeValidator,
-  Request,
-  HttpException,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -27,12 +22,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import FilesHelper from 'files/FilesHelper';
-import { multerOptions } from 'files/muttler.config';
 import { diskStorage } from 'multer';
-import { extname, parse } from 'path';
+import { parse } from 'path';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Skill } from 'src/skills/entities/skill.entity';
-import { DeleteResult } from 'typeorm';
 import { constants } from 'utils/constants';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
@@ -42,7 +34,7 @@ import { UserService } from './users.service';
 
 @ApiTags('Users')
 @Controller('users')
-//@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -59,8 +51,7 @@ export class UserController {
     type: [User],
   })
   findAll() {
-    const users = this.userService.findAll();
-    return users;
+    return this.userService.findAll();
   }
 
   @Get(':id')
