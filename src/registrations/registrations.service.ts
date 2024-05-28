@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/mail/mail.service';
 import { UserService } from 'src/users/users.service';
@@ -12,6 +18,8 @@ import { Registration } from './entities/registration.entity';
 
 @Injectable()
 export class RegistrationsService {
+  private logger = new Logger(RegistrationsService.name);
+
   constructor(
     @InjectRepository(Registration)
     private registrationRepository: Repository<Registration>,
@@ -35,21 +43,31 @@ export class RegistrationsService {
     const uni_email = uni_reg_id.toLowerCase() + '@dsu.edu.pk';
     const token = this.genToken(40);
 
-    await this.mailService.sendVerificationEmail(uni_email, token, 'internal');
-    await this.registrationRepository.increment(
-      { uni_email },
-      'uni_email_sent',
-      1,
-    );
+    try {
+      await this.mailService.sendVerificationEmail(
+        uni_email,
+        token,
+        'internal',
+      );
+      await this.registrationRepository.increment(
+        { uni_email },
+        'uni_email_sent',
+        1,
+      );
 
-    await this.registrationRepository.update(
-      { uni_email },
-      { step: 1, uni_token: token },
-    );
+      await this.registrationRepository.update(
+        { uni_email },
+        { step: 1, uni_token: token },
+      );
 
-    //change this back once done with frontend
-    const reg_user = await this.registrationRepository.findOneBy({ uni_email });
-    return { token: reg_user.uni_token, id: reg_user.id };
+      const reg_user = await this.registrationRepository.findOneBy({
+        uni_email,
+      });
+
+      return { token: reg_user.uni_token, id: reg_user.id, email: uni_email };
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   async getUniEmailTokenData({ token }: TokenDto) {
@@ -96,7 +114,6 @@ export class RegistrationsService {
   }
 
   async verifyNewAccountEmail(verifyNewAccountDto: VerifyNewAccountDto) {
-    //Register User
     const currentRegistrationUser = await this.registrationRepository.findOneBy(
       {
         id: verifyNewAccountDto.reg_id,
@@ -104,34 +121,43 @@ export class RegistrationsService {
     );
 
     if (!currentRegistrationUser)
-      throw new HttpException('Registration not found', HttpStatus.BAD_REQUEST);
-
-    const token = this.genToken(40);
+      throw new BadRequestException('Registration not found');
 
     const { id, first_name, middle_name, last_name, uni_email } =
       currentRegistrationUser;
 
+    if (await this.userService.findByUniEmail(uni_email))
+      throw new BadRequestException(
+        `Cannot register new user, user with uni email '${uni_email}' already exists`,
+      );
+
     const { phone, email, password } = verifyNewAccountDto;
 
-    await this.mailService.sendVerificationEmail(email, token, 'external');
-    await this.registrationRepository.increment({ id }, 'email_sent', 1);
+    const token = this.genToken(40);
 
-    await this.registrationRepository.update(
-      { id },
-      { step: 3, email_token: token },
-    );
+    try {
+      await this.mailService.sendVerificationEmail(email, token, 'external');
+      await this.registrationRepository.increment({ id }, 'email_sent', 1);
 
-    const { id: uid } = await this.userService.create({
-      uni_email,
-      phone,
-      first_name,
-      middle_name,
-      last_name,
-      email,
-      password,
-    });
+      await this.registrationRepository.update(
+        { id },
+        { step: 3, email_token: token },
+      );
 
-    return { user_id: uid, token };
+      const { id: uid } = await this.userService.create({
+        uni_email,
+        phone,
+        first_name,
+        middle_name,
+        last_name,
+        email,
+        password,
+      });
+
+      return { user_id: uid, token, email };
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   async getNewAccountTokenData({ token }: TokenDto) {
