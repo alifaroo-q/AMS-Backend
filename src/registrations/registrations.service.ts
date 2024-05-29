@@ -1,17 +1,10 @@
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/mail/mail.service';
 import { UserService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { TokenDto } from './dto/token.dto';
-import { UpdateRegistrationDto } from './dto/update-registration.dto';
 import { VerifyNewAccountDto } from './dto/verify-new-account.dto';
 import { VerifyUniEmailDto } from './dto/verify-uni-email.dto';
 import { Registration } from './entities/registration.entity';
@@ -71,16 +64,12 @@ export class RegistrationsService {
   }
 
   async getUniEmailTokenData({ token }: TokenDto) {
-    //check if token is validated or not
     const reg_user = await this.registrationRepository.findOne({
       where: { uni_token: token, uni_verified: true },
     });
 
     if (!reg_user)
-      throw new HttpException(
-        'Invalid Token or Not Verified',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException('Invalid Token or Not Verified');
 
     const {
       uni_email_sent,
@@ -102,8 +91,7 @@ export class RegistrationsService {
       uni_token: token,
     });
 
-    if (!userWithValidToken)
-      throw new HttpException('Invalid Token', HttpStatus.BAD_REQUEST);
+    if (!userWithValidToken) throw new BadRequestException('Invalid Token');
 
     await this.registrationRepository.update(
       { id: userWithValidToken.id },
@@ -125,11 +113,6 @@ export class RegistrationsService {
 
     const { id, first_name, middle_name, last_name, uni_email } =
       currentRegistrationUser;
-
-    if (await this.userService.findByUniEmail(uni_email))
-      throw new BadRequestException(
-        `Cannot register new user, user with uni email '${uni_email}' already exists`,
-      );
 
     const { phone, email, password } = verifyNewAccountDto;
 
@@ -161,16 +144,12 @@ export class RegistrationsService {
   }
 
   async getNewAccountTokenData({ token }: TokenDto) {
-    //check if token is validated or not
     const reg_user = await this.registrationRepository.findOne({
       where: { email_token: token, email_verified: true },
     });
 
     if (!reg_user)
-      throw new HttpException(
-        'Invalid Token or Not Verified',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException('Invalid Token or Not Verified');
 
     const {
       password,
@@ -190,7 +169,7 @@ export class RegistrationsService {
       email_token: token,
     });
 
-    if (!res) throw new HttpException('Invalid Token', HttpStatus.BAD_REQUEST);
+    if (!res) throw new BadRequestException('Invalid Token');
 
     await this.registrationRepository.update(
       { id: res.id },
@@ -204,24 +183,11 @@ export class RegistrationsService {
     return this.registrationRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} registration`;
-  }
-
-  update(id: number, updateRegistrationDto: UpdateRegistrationDto) {
-    return `This action updates a #${id} registration`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} registration`;
-  }
-
   async getStepWithId(reg_num: string) {
     const uni_email = reg_num.toLowerCase() + '@dsu.edu.pk';
     const reg_user = await this.registrationRepository.findOneBy({ uni_email });
 
-    if (!reg_user)
-      throw new HttpException('Invalid roll number', HttpStatus.BAD_REQUEST);
+    if (!reg_user) throw new BadRequestException('Invalid roll number');
 
     return { step: reg_user.step, id: reg_user.id };
   }

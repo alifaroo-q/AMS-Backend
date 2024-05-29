@@ -3,22 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   UseInterceptors,
   UploadedFile,
-  ParseFilePipe,
-  FileTypeValidator,
-  MaxFileSizeValidator,
-  Request,
-  HttpException,
-  HttpStatus,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
-import { RegistrationsService } from './registrations.service';
-import { CreateRegistrationDto } from './dto/create-registration.dto';
-import { UpdateRegistrationDto } from './dto/update-registration.dto';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -39,19 +29,8 @@ import { TokenDto } from './dto/token.dto';
 import { User } from 'src/users/entities/users.entity';
 import { parse as csvParse } from 'csv-parse';
 import * as fs from 'fs';
-
-// const tokenData = {
-//   id: 1,
-//   uni_email: 'se121@gmail.com',
-//   first_name: 'Saad',
-//   middle_name: 'Sud',
-//   last_name: 'Syed',
-//   qualification: 'Bachelor',
-//   area: 'Computer Science',
-//   registration_time: '2018-06-01 00:00:00',
-//   graduation_time: '2018-06-01 00:00:00',
-//   cgpa: 3.27,
-// };
+import { RegistrationsService } from './registrations.service';
+import { CreateRegistrationDto } from './dto/create-registration.dto';
 
 @ApiTags('Registration')
 @Controller('registrations')
@@ -101,10 +80,7 @@ export class RegistrationsController {
         if (!['.csv'].includes(ext)) {
           req.fileValidationError = 'Invalid file type';
           return callback(
-            new HttpException(
-              'Invalid File Type ' + ext,
-              HttpStatus.BAD_REQUEST,
-            ),
+            new BadRequestException('Invalid File Type ' + ext),
             false,
           );
         }
@@ -125,12 +101,13 @@ export class RegistrationsController {
   )
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     type rec = { id: number; fname: string; lname: string };
+
     const headers = ['id', 'fname', 'lname'];
     const records: rec[] = [];
     const csvFilePath = constants.UPLOAD_LOCATION + file.filename;
     const fileContent = fs.readFileSync(csvFilePath, { encoding: 'utf-8' });
+
     let readError = 'No Error';
-    //console.log(fileContent);
 
     const parser = csvParse(fileContent, {
       delimiter: ',',
@@ -149,7 +126,7 @@ export class RegistrationsController {
       })
       .on('error', function (err) {
         // Catch any error
-        let x = this.pause();
+        const x = this.pause();
         console.log(err.message);
         readError = err.message;
         console.log('Saad');
@@ -229,27 +206,4 @@ export class RegistrationsController {
   getStepWithId(@Param('roll_number') roll_number: string) {
     return this.registrationsService.getStepWithId(roll_number);
   }
-
-  // @Get()
-  // findAll() {
-  //   return this.registrationsService.findAll();
-  // }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.registrationsService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateRegistrationDto: UpdateRegistrationDto,
-  // ) {
-  //   return this.registrationsService.update(+id, updateRegistrationDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.registrationsService.remove(+id);
-  // }
 }

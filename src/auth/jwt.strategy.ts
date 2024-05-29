@@ -23,11 +23,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       exp: payload.exp,
       sts: 'verified',
       role: payload.role_id,
+      ...user,
       human:
         new Date(payload.iat * 1000).toString() +
         '-----to-----' +
         new Date(payload.exp * 1000).toString(),
-      ...user,
     };
   }
 }

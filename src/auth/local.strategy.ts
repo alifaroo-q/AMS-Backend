@@ -9,7 +9,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super({
       usernameField: 'email',
       //passwordField: 'password'
-    }); // here is to add config for passport strategies
+    });
   }
 
   async validate(email: string, password: string): Promise<any> {

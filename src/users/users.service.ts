@@ -1,4 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import FilesHelper from 'files/FilesHelper';
 import { Profile } from 'src/profiles/entities/profile.entity';
@@ -7,6 +11,11 @@ import { CreateUserParams, UpdateUserParams } from 'utils/types';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { User } from './entities/users.entity';
+
+enum RolesEnum {
+  'Admin' = 1,
+  'User' = 2,
+}
 
 @Injectable()
 export class UserService {
@@ -19,15 +28,14 @@ export class UserService {
   async create(userDetails: CreateUserDto) {
     const newUser = this.userRepository.create({
       ...userDetails,
-      role: 2,
+      role: RolesEnum.User,
     });
 
     const createdUser = await this.userRepository.save(newUser);
 
     if (!this.fileHelper.createAlumniFolder(createdUser))
-      throw new HttpException(
+      throw new ForbiddenException(
         'Something Went Wrong - Folder Write failed!',
-        HttpStatus.FORBIDDEN,
       );
 
     return createdUser;
@@ -38,53 +46,52 @@ export class UserService {
   }
 
   async findOne(id: number) {
-    //const user = await this.userRepository.findOneBy({ id }); or
     const user = await this.userRepository.findOne({
       where: { id },
-      //relations: ['profile', 'skills', 'academics'],
     });
-    if (user) return user;
-    else throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+    if (!user) throw new BadRequestException('User not found');
+    return user;
   }
 
   async findOneWithSkills(id: number) {
-    //const user = await this.userRepository.findOneBy({ id }); or
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['skills'],
     });
-    if (user) return user;
-    else throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+    if (!user) throw new BadRequestException('User not found');
+    return user;
   }
 
   async findOneWithAcademics(id: number) {
-    //const user = await this.userRepository.findOneBy({ id }); or
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['academics'],
     });
-    if (user) return user;
-    else throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+    if (!user) throw new BadRequestException('User not found');
+    return user;
   }
 
   async findOneWithExperiences(id: number) {
-    //const user = await this.userRepository.findOneBy({ id }); or
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['experiences'],
     });
-    if (user) return user;
-    else throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+    if (!user) throw new BadRequestException('User not found');
+    return user;
   }
 
   async findOneWithSurvey(id: number) {
-    //const user = await this.userRepository.findOneBy({ id }); or
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['survey'],
     });
-    if (user) return user;
-    else throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+    if (!user) throw new BadRequestException('User not found');
+    return user;
   }
 
   async findOneWithProfile(id: number) {
@@ -93,43 +100,35 @@ export class UserService {
       relations: ['profile'],
     });
 
-    if (!user)
-      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
-
+    if (!user) throw new BadRequestException('User not found');
     return user;
   }
 
   async findByEmail(email: string) {
     const user = await this.userRepository.findOneBy({ email });
-    if (user) return user;
-    else
-      throw new HttpException(
-        'User not found with email: ' + email,
-        HttpStatus.BAD_REQUEST,
-      );
+    if (!user)
+      throw new BadRequestException(`User not found with email '${email}'`);
+
+    return user;
   }
 
   async findByToken(token: string) {
     const user = await this.userRepository.findOneBy({
       password_reset_token: token,
     });
-    if (user) return user;
-    else
-      throw new HttpException(
-        'User not found with token: ' + token,
-        HttpStatus.BAD_REQUEST,
-      );
+
+    if (!user)
+      throw new BadRequestException(`User not found with token '${token}'`);
+
+    return user;
   }
 
   async findByUniEmail(uni_email: string) {
-    console.log('Email seaching ..');
     const user = await this.userRepository.findOneBy({ uni_email });
-    if (user) return user;
-    else
-      throw new HttpException(
-        'User not found with email: ' + uni_email,
-        HttpStatus.BAD_REQUEST,
-      );
+    if (!user)
+      throw new BadRequestException(`User not found with email '${uni_email}'`);
+
+    return user;
   }
 
   update(id: number, userDetails: UpdateUserParams) {
@@ -146,30 +145,29 @@ export class UserService {
     });
 
     if (!user.profile)
-      throw new HttpException(
-        'First Create a Profile Befor Updating It: ',
-        HttpStatus.BAD_REQUEST,
+      throw new BadRequestException(
+        'Please create a profile before updating it',
       );
+
     if (userProfileDetails.email) {
       const emailUser = await this.userRepository.findOneBy({
         email: userProfileDetails.email,
       });
+
       if (emailUser && emailUser.id !== user.id)
-        // check if email exist and it is not of update user
-        throw new HttpException(
-          'User found with email: ' + userProfileDetails.email,
-          HttpStatus.BAD_REQUEST,
+        throw new BadRequestException(
+          `User found with email: ${userProfileDetails.email}`,
         );
     }
+
     if (userProfileDetails.uni_email) {
       const uniEmailUser = await this.userRepository.findOneBy({
         uni_email: userProfileDetails.uni_email,
       });
+
       if (uniEmailUser && uniEmailUser.id !== user.id)
-        // check if uni_email exist and it is not of the update user
-        throw new HttpException(
-          'User found with uni email: ' + userProfileDetails.uni_email,
-          HttpStatus.BAD_REQUEST,
+        throw new BadRequestException(
+          `User found with uni email: ${userProfileDetails.uni_email}`,
         );
     }
 
@@ -177,23 +175,21 @@ export class UserService {
       const phoneUser = await this.userRepository.findOneBy({
         phone: userProfileDetails.phone,
       });
+
       if (phoneUser && phoneUser.id !== user.id)
-        // check if phone exist and it is not of the update user
-        throw new HttpException(
-          'User found with phone: ' + userProfileDetails.phone,
-          HttpStatus.BAD_REQUEST,
+        throw new BadRequestException(
+          `User found with phone: ${userProfileDetails.phone}`,
         );
     }
 
     const { date_of_birth, country, timezone, ...more } = userProfileDetails;
-    // if (country) user.profile.country = country;
-    // if (date_of_birth) user.profile.date_of_birth = date_of_birth;
-    // if (timezone) user.profile.timezone = timezone;
+
     await this.profileRepository.update(user.profile.id, {
       date_of_birth,
       country,
       timezone,
     });
+
     return this.userRepository.update({ id }, { ...more });
   }
 
@@ -209,19 +205,10 @@ export class UserService {
   }
 
   async updateAvatar(id: number, file: Express.Multer.File) {
-    // const user = await this.userRepository.findOneBy({ id });
-    // if (user && user.avatar != 'default/avatar.jpg') {
-    //   const fileSys = new FilesHelper();
-    //   fileSys.removeFolderOrFile(constants.UPLOAD_LOCATION + user.avatar);
-    // }
     return this.userRepository.update({ id }, { avatar: file.filename });
   }
 
   remove(id: number) {
     return this.userRepository.delete({ id });
   }
-
-  // doLook(e: string) {
-  //   return this.userRepository.findOneBy({ uni_email: e });
-  // }
 }

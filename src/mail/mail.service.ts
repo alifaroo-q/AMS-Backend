@@ -7,7 +7,7 @@ const PASSWORD_CHANGE_TEMPLATE = 'd-8fb05ae60f064c408b20b25df31101a7';
 
 @Injectable()
 export class MailService {
-  private logger = new Logger('MailService');
+  private logger = new Logger(MailService.name);
 
   constructor() {
     SendGrid.setApiKey(process.env.SENDGRID_API_KEY);

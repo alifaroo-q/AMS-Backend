@@ -1,10 +1,9 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
-  HttpException,
-  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -57,8 +56,8 @@ export class UserController {
   @Get(':id')
   @ApiOkResponse({ description: 'User by Id', type: User })
   @ApiBadRequestResponse({ description: 'User Not Found' })
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findOne(id);
   }
 
   @Get(':id/skills')
@@ -67,8 +66,8 @@ export class UserController {
     type: 'user with skills',
   })
   @ApiBadRequestResponse({ description: 'User Not Found' })
-  findOneS(@Param('id') id: string) {
-    return this.userService.findOneWithSkills(+id);
+  findOneS(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findOneWithSkills(id);
   }
 
   @Get(':id/academics')
@@ -77,8 +76,8 @@ export class UserController {
     type: 'user with academics',
   })
   @ApiBadRequestResponse({ description: 'User Not Found' })
-  findOneA(@Param('id') id: string) {
-    return this.userService.findOneWithAcademics(+id);
+  findOneA(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findOneWithAcademics(id);
   }
 
   @Get(':id/experiences')
@@ -87,8 +86,8 @@ export class UserController {
     type: 'user with Experience',
   })
   @ApiBadRequestResponse({ description: 'User Not Found' })
-  findOneE(@Param('id') id: string) {
-    return this.userService.findOneWithExperiences(+id);
+  findOneE(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findOneWithExperiences(id);
   }
 
   @Get(':id/survey')
@@ -97,8 +96,8 @@ export class UserController {
     type: 'user with survey',
   })
   @ApiBadRequestResponse({ description: 'User Not Found' })
-  findOneSur(@Param('id') id: string) {
-    return this.userService.findOneWithSurvey(+id);
+  findOneSur(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findOneWithSurvey(id);
   }
 
   @Get(':id/profile')
@@ -107,8 +106,8 @@ export class UserController {
     type: 'user with profile',
   })
   @ApiBadRequestResponse({ description: 'User Not Found' })
-  findOneP(@Param('id') id: string) {
-    return this.userService.findOneWithProfile(+id);
+  findOneP(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findOneWithProfile(id);
   }
 
   @Get('email/:email')
@@ -122,28 +121,28 @@ export class UserController {
   @ApiCreatedResponse({ description: 'User Update' })
   @ApiBadRequestResponse({ description: 'User Update Failed' })
   update(
-    @Param('id', ParseIntPipe) id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.update(+id, updateUserDto);
+    return this.userService.update(id, updateUserDto);
   }
 
   @Patch(':userId/withProfile')
   @ApiCreatedResponse({ description: 'User + Profile Update' })
   @ApiBadRequestResponse({ description: 'User + Profile Update Failed' })
   updateWithProfile(
-    @Param('userId', ParseIntPipe) id: string,
+    @Param('userId', ParseIntPipe) userId: number,
     @Body() updateUserProfileDto: UpdateUserProfileDto,
   ) {
-    return this.userService.updateWithProfile(+id, updateUserProfileDto);
+    return this.userService.updateWithProfile(userId, updateUserProfileDto);
   }
 
   @Delete(':id')
   @ApiOkResponse({
     description: 'User Deleted',
   })
-  remove(@Param('id', ParseIntPipe) id: string) {
-    return this.userService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.remove(id);
   }
 
   //@UseGuards(JwtAuthGuard)
@@ -160,10 +159,7 @@ export class UserController {
         if (!['.png', '.jpeg', '.jpg'].includes(ext)) {
           req.fileValidationError = 'Invalid file type';
           return callback(
-            new HttpException(
-              'Invalid File Type ' + ext,
-              HttpStatus.BAD_REQUEST,
-            ),
+            new BadRequestException('Invalid File Type ' + ext),
             false,
           );
         }
@@ -184,52 +180,11 @@ export class UserController {
       }),
     }),
   )
-  uploadFile(
-    @Param('id', ParseIntPipe) id: string,
+  uploadProfilePic(
+    @Param('id', ParseIntPipe) id: number,
     @Request() req,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.userService.updateAvatar(+id, file);
+    return this.userService.updateAvatar(id, file);
   }
-
-  // @UseGuards(JwtAuthGuard)
-  // @Post('uploadProfilePic')
-  // @UseInterceptors(
-  //   FileInterceptor('profileImage', {
-  //     storage: diskStorage({
-  //       destination: constants.UPLOAD_LOCATION,
-  //       filename: (req: any, file, cb) => {
-  //         //const subfolder = req.user.sub + '-' + req.user.name;
-  //         const unique = new Date().getTime();
-  //         const fn = parse(file.originalname);
-  //         const filename = `${req.user.sub}/${unique}-${fn.name}${fn.ext}`;
-  //         const fileSys = new FilesHelper();
-  //         fileSys.createAlumniFolder(req.user);
-  //         fileSys.removeOldAvatar(constants.UPLOAD_LOCATION + req.user.avatar);
-  //         cb(null, filename);
-  //       },
-  //     }),
-  //   }),
-  // )
-  // uploadFile(
-  //   @Request() req,
-  //   @UploadedFile(
-  //     new ParseFilePipe({
-  //       validators: [
-  //         new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
-  //         new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
-  //       ],
-  //     }),
-  //   )
-  //   file: Express.Multer.File,
-  // ) {
-  //   console.log('Pathcc: ' + process.env.UPLOAD_LOCATION);
-  //   console.log(file);
-  //   return this.userService.updateProfile(req.user.sub, file);
-  // }
-
-  // @Get('uni/:e')
-  // doLook(@Param('e') e: string) {
-  //   return this.userService.doLook(e);
-  // }
 }

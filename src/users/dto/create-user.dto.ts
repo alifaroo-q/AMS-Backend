@@ -48,5 +48,4 @@ export class CreateUserDto {
 
   @ApiProperty({ description: 'last name', example: 'Luqman', required: false })
   last_name: string;
-  //confirmPassword: string;
 }

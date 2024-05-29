@@ -16,8 +16,7 @@ export class IsPhoneAvailable implements ValidatorConstraintInterface {
   ) {}
   async validate(phone: string, args: ValidationArguments) {
     const user = await this.userRepository.findOneBy({ phone });
-    if (user) return false;
-    return true;
+    return !user;
   }
 }
 

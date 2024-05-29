@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserService } from 'src/users/users.service';
 import { MailService } from 'src/mail/mail.service';
 import { JwtService } from '@nestjs/jwt';
@@ -48,10 +48,7 @@ export class AuthService {
     const user = await this.userService.findByToken(token);
 
     if (!user)
-      throw new HttpException(
-        'User not found with token: ' + token,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException('User not found with token: ' + token);
 
     return await this.userService.updatePassword(
       user.id,

@@ -16,8 +16,7 @@ export class IsUniEmailUnique implements ValidatorConstraintInterface {
   ) {}
   async validate(uni_email: string, args: ValidationArguments) {
     const user = await this.userRepository.findOneBy({ uni_email });
-    if (user) return false;
-    return true;
+    return !user;
   }
 }
 

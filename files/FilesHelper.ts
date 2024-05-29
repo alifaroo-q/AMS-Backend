@@ -1,93 +1,75 @@
-import { User } from 'src/users/entities/users.entity';
 import { constants } from 'utils/constants';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export default class {
-  private fs = require('fs');
   private workDir = constants.UPLOAD_LOCATION;
 
   createAlumniFolder(createdUser: any) {
-    const dir = this.workDir + createdUser.id; //path;
-    //console.log(dir);
-    if (!this.fs.existsSync(dir)) {
-      this.fs.mkdirSync(dir, { recursive: true });
-      return true;
-    }
-    return false;
+    const dir = path.join(this.workDir, String(createdUser.id));
+    if (fs.existsSync(dir)) return false;
+    fs.mkdirSync(dir, { recursive: true });
+    return true;
   }
 
   createAlumniProfileFolder(createdUser: any) {
-    let dir = this.workDir + createdUser.id + '/avatar'; //path;
-    //console.log(dir);
-    if (!this.fs.existsSync(dir)) {
-      this.fs.mkdirSync(dir, { recursive: true });
-      return true;
-    }
-    return false;
+    const dir = path.join(this.workDir, String(createdUser.id), '/avatar');
+    if (fs.existsSync(dir)) return false;
+    fs.mkdirSync(dir, { recursive: true });
+    return true;
   }
 
   createAlumniCertificateFolder(createdUser: any) {
-    let dir = this.workDir + createdUser.userId + '/skillCertificates'; //path;
-    //console.log(dir);
-    if (!this.fs.existsSync(dir)) {
-      this.fs.mkdirSync(dir, { recursive: true });
-      return true;
-    }
-    return false;
+    const dir = path.join(
+      this.workDir,
+      String(createdUser.userId),
+      '/skillCertificates',
+    );
+    if (fs.existsSync(dir)) return false;
+    fs.mkdirSync(dir, { recursive: true });
+    return true;
   }
 
   createAlumniAcademicsFolder(createdUser: any) {
-    let dir = this.workDir + createdUser.userId + '/academicCertificates'; //path;
-    //console.log(dir);
-    if (!this.fs.existsSync(dir)) {
-      this.fs.mkdirSync(dir, { recursive: true });
-      return true;
-    }
-    return false;
+    const dir = path.join(
+      this.workDir,
+      String(createdUser.userId),
+      '/academicCertificates',
+    );
+    if (fs.existsSync(dir)) return false;
+    fs.mkdirSync(dir, { recursive: true });
+    return true;
   }
 
   createAlumniResumeFolder(createdUser: any) {
-    let dir = this.workDir + createdUser.userId + '/profileResume'; //path;
-    //console.log(dir);
-    if (!this.fs.existsSync(dir)) {
-      this.fs.mkdirSync(dir, { recursive: true });
-      return true;
-    }
-    return false;
+    const dir = path.join(
+      this.workDir,
+      String(createdUser.userId),
+      '/profileResume',
+    );
+    if (fs.existsSync(dir)) return false;
+    fs.mkdirSync(dir, { recursive: true });
+    return true;
   }
 
   removeFolderOrFile(path: string) {
-    if (!this.fs.existsSync(path)) {
-      console.log('Path dosent Exist:' + path);
-      return false;
-    }
-    const stats = this.fs.statSync(path);
-    // check if directory
+    if (!fs.existsSync(path)) return false;
+    const stats = fs.statSync(path);
     if (stats.isDirectory()) {
-      // true
-      this.fs.rmSync(path, { recursive: true, force: true }, (error) => {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log(path + ' Deleted!');
-        }
-      });
-      return true;
-    } else {
-      this.fs.unlink(path, function (err) {
-        if (err) console.log(err);
-        // if no error, file has been deleted successfully
-        console.log('File deleted!');
-      });
+      fs.rmSync(path, { recursive: true, force: true });
       return true;
     }
+    fs.unlink(path, function (err) {
+      if (err) console.log(err);
+      console.log('File deleted!');
+    });
+    return true;
   }
 
-  createGeneralFolder(path: string) {
-    let dir = this.workDir + path;
-    if (!this.fs.existsSync(dir)) {
-      this.fs.mkdirSync(dir, { recursive: true });
-      return true;
-    }
-    return false;
+  createGeneralFolder(pathOfFolder: string) {
+    const dir = path.join(this.workDir, pathOfFolder);
+    if (fs.existsSync(dir)) return false;
+    fs.mkdirSync(dir, { recursive: true });
+    return true;
   }
 }
