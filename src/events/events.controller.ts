@@ -11,20 +11,34 @@ import {
   UploadedFile,
   ParseIntPipe,
   ParseFilePipe,
+  UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
+import {
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import * as path from 'path';
+import { diskStorage } from 'multer';
+import { Event } from './entities/event.entity';
 import { EventsService } from './events.service';
+import { constants } from '../../utils/constants';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import * as path from 'path';
-import { diskStorage } from 'multer';
-import { constants } from '../../utils/constants';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AuthUser } from '../auth/decorator/user.decorator';
 
+@ApiTags('Events')
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
+  @ApiCreatedResponse({ description: 'Event Created', type: Event })
   @UseInterceptors(
     FileInterceptor('event_image', {
       limits: { fileSize: 4 * 1024 * 1024 },
@@ -62,16 +76,27 @@ export class EventsController {
   }
 
   @Get()
+  @ApiOkResponse({
+    description: 'All Events',
+    type: [Event],
+  })
   findAll() {
     return this.eventsService.findAll();
   }
 
   @Get(':id')
+  @ApiOkResponse({ description: 'Event with provided Id', type: Event })
+  @ApiNotFoundResponse({ description: 'Event with provided not found' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.eventsService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
+  @ApiCreatedResponse({ description: 'Event with provided Id updated' })
+  @ApiNotFoundResponse({
+    description: 'Event with provided Id not found, update failed',
+  })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEventDto: UpdateEventDto,
@@ -79,7 +104,9 @@ export class EventsController {
     return this.eventsService.update(id, updateEventDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
+  @ApiOkResponse({ description: 'Event with provided Id deleted' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.eventsService.remove(id);
   }
