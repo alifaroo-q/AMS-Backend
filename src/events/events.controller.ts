@@ -12,7 +12,6 @@ import {
   ParseIntPipe,
   ParseFilePipe,
   UseGuards,
-  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -29,7 +28,6 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { AuthUser } from '../auth/decorator/user.decorator';
 
 @ApiTags('Events')
 @Controller('events')
