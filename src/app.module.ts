@@ -21,6 +21,7 @@ import { SurveyModule } from './survey/survey.module';
 import { Survey } from './survey/entities/survey.entity';
 import { DoesEmailExist } from './auth/dto/DoesEmailExists';
 import { EventsModule } from './events/events.module';
+import { Event } from './events/entities/event.entity';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { EventsModule } from './events/events.module';
         Experience,
         Survey,
         Registration,
+        Event,
       ],
       synchronize: true,
     }),
