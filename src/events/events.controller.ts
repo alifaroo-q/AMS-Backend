@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  BadRequestException,
   UploadedFile,
   ParseIntPipe,
   ParseFilePipe,
@@ -19,8 +18,6 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import * as path from 'path';
-import { diskStorage } from 'multer';
 import { Event } from './entities/event.entity';
 import { EventsService } from './events.service';
 import { constants } from '../../utils/constants';
@@ -28,38 +25,24 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { MulterFileUpload } from '../../utils/file-upload.multer';
 
 @ApiTags('Events')
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post()
   @ApiCreatedResponse({ description: 'Event Created', type: Event })
   @UseInterceptors(
-    FileInterceptor('event_image', {
-      limits: { fileSize: 4 * 1024 * 1024 },
-      fileFilter: (req, file, callback) => {
-        const ext = path.parse(file.originalname).ext;
-        if (!['.png', '.jpeg', '.jpg'].includes(ext)) {
-          req.fileValidationError = 'Invalid file type';
-          return callback(
-            new BadRequestException('Invalid File Type ' + ext),
-            false,
-          );
-        }
-        return callback(null, true);
-      },
-      storage: diskStorage({
-        destination: constants.EVENT_UPLOAD_LOCATION,
-        filename: (req: any, file, cb) => {
-          const fn = path.parse(file.originalname);
-          const filename = `${fn.name}-${new Date().getTime()}${fn.ext}`;
-          cb(null, filename);
-        },
+    FileInterceptor(
+      'event_image',
+      MulterFileUpload({
+        allowedFiles: ['.png', '.jpg', '.jpeg'],
+        uploadLocation: constants.EVENT_UPLOAD_LOCATION,
       }),
-    }),
+    ),
   )
   create(
     @Body() createEventDto: CreateEventDto,
@@ -89,17 +72,32 @@ export class EventsController {
     return this.eventsService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiCreatedResponse({ description: 'Event with provided Id updated' })
   @ApiNotFoundResponse({
     description: 'Event with provided Id not found, update failed',
   })
+  @UseInterceptors(
+    FileInterceptor(
+      'event_image',
+      MulterFileUpload({
+        allowedFiles: ['.png', '.jpg', '.jpeg'],
+        uploadLocation: constants.EVENT_UPLOAD_LOCATION,
+      }),
+    ),
+  )
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEventDto: UpdateEventDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: false,
+      }),
+    )
+    event_image: Express.Multer.File,
   ) {
-    return this.eventsService.update(id, updateEventDto);
+    return this.eventsService.update(id, updateEventDto, event_image);
   }
 
   @UseGuards(JwtAuthGuard)

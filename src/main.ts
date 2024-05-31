@@ -1,15 +1,16 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { useContainer } from 'class-validator';
-import { AppModule } from './app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { AppModule } from './app.module';
+import { NestFactory } from '@nestjs/core';
+import { useContainer } from 'class-validator';
+import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.setGlobalPrefix('api');
 
   // enable DI for class-validator (Important for custom validation decorators)
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
@@ -22,7 +23,7 @@ async function bootstrap() {
     .addTag('Auth')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('docs', app, document);
   /* for Swagger */
 
   app.useStaticAssets(join(__dirname, '..', '..', 'files'));

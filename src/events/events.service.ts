@@ -34,10 +34,38 @@ export class EventsService {
     return event;
   }
 
-  async update(id: number, updateEventDto: UpdateEventDto) {
+  async update(
+    id: number,
+    updateEventDto: UpdateEventDto,
+    event_image: Express.Multer.File,
+  ) {
     const event = await this.eventRepository.findOneBy({ id });
+
     if (!event) throw new NotFoundException(`Event with id '${id}' not found`);
-    return this.eventRepository.update(id, updateEventDto);
+
+    const event_image_path = path.join(
+      constants.EVENT_UPLOAD_LOCATION,
+      event.event_image,
+    );
+
+    if (
+      event_image &&
+      event.event_image !== constants.DEFAULT_EVENT &&
+      fs.existsSync(event_image_path)
+    ) {
+      fs.unlink(event_image_path, function (err) {
+        if (err) console.log(err);
+      });
+
+      return this.eventRepository.update(id, {
+        ...updateEventDto,
+        event_image: event_image.filename,
+      });
+    }
+
+    return this.eventRepository.update(id, {
+      ...updateEventDto,
+    });
   }
 
   async remove(id: number) {
