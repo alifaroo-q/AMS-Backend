@@ -23,6 +23,7 @@ import { DoesEmailExist } from './auth/dto/DoesEmailExists';
 import { EventsModule } from './events/events.module';
 import { Event } from './events/entities/event.entity';
 import { NewsModule } from './news/news.module';
+import { News } from './news/entities/news.entity';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { NewsModule } from './news/news.module';
         Survey,
         Registration,
         Event,
+        News,
       ],
       synchronize: true,
     }),

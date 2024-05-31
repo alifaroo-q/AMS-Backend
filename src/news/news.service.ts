@@ -1,26 +1,83 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateNewsDto } from './dto/create-news.dto';
 import { UpdateNewsDto } from './dto/update-news.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { News } from './entities/news.entity';
+import { Repository } from 'typeorm';
+import { constants } from '../../utils/constants';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class NewsService {
-  create(createNewsDto: CreateNewsDto) {
-    return 'This action adds a new news';
+  constructor(
+    @InjectRepository(News) private readonly newsRepository: Repository<News>,
+  ) {}
+  async create(createNewsDto: CreateNewsDto, news_image: Express.Multer.File) {
+    const news = this.newsRepository.create(createNewsDto);
+    if (news_image) news.news_image = news_image.filename;
+    return await this.newsRepository.save(news);
   }
 
-  findAll() {
-    return `This action returns all news`;
+  async findAll() {
+    return await this.newsRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} news`;
+  async findOne(id: number) {
+    const news = await this.newsRepository.findOneBy({ id });
+    if (!news) throw new NotFoundException(`News with id '${id}' not found`);
+    return news;
   }
 
-  update(id: number, updateNewsDto: UpdateNewsDto) {
-    return `This action updates a #${id} news`;
+  async update(
+    id: number,
+    updateNewsDto: UpdateNewsDto,
+    news_image: Express.Multer.File,
+  ) {
+    const news = await this.newsRepository.findOneBy({ id });
+
+    if (!news) throw new NotFoundException(`News with id '${id}' not found`);
+
+    const news_image_path = path.join(
+      constants.NEWS_UPLOAD_LOCATION,
+      news.news_image,
+    );
+
+    if (
+      news_image &&
+      news.news_image !== constants.DEFAULT_NEWS &&
+      fs.existsSync(news_image_path)
+    ) {
+      fs.unlink(news_image_path, function (err) {
+        if (err) console.log(err);
+      });
+
+      return this.newsRepository.update(id, {
+        ...updateNewsDto,
+        news_image: news_image.filename,
+      });
+    }
+
+    return this.newsRepository.update(id, {
+      ...updateNewsDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} news`;
+  async remove(id: number) {
+    const news = await this.newsRepository.findOneBy({ id });
+
+    if (!news) throw new NotFoundException(`News with id '${id}' not found`);
+
+    const news_image = path.join(
+      constants.NEWS_UPLOAD_LOCATION,
+      news.news_image,
+    );
+
+    if (fs.existsSync(news_image) && news.news_image !== constants.DEFAULT_NEWS)
+      fs.unlink(news_image, function (err) {
+        if (err) console.log(err);
+      });
+
+    return await this.newsRepository.delete({ id });
   }
 }
