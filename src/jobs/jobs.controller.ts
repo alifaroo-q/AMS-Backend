@@ -48,18 +48,30 @@ export class JobsController {
     return this.jobsService.findAll();
   }
 
+  @Get('/unapproved')
+  findAllUnApproved() {
+    return this.jobsService.findAllUnApproved();
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.jobsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.jobsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateJobDto: UpdateJobDto) {
-    return this.jobsService.update(+id, updateJobDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateJobDto: UpdateJobDto,
+    @AuthUser() currentUser: IAuthUser,
+  ) {
+    return this.jobsService.update(id, updateJobDto, currentUser);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.jobsService.remove(+id);
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @AuthUser() currentUser: IAuthUser,
+  ) {
+    return this.jobsService.remove(id, currentUser);
   }
 }

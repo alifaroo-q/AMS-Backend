@@ -54,17 +54,21 @@ export class JobsService {
     return await this.jobRepository.find();
   }
 
+  async findAllUnApproved() {
+    return await this.jobRepository.find({ where: { isApproved: false } });
+  }
+
   async findOne(id: number) {
     const job = await this.jobRepository.findOneBy({ id });
     if (!job) throw new NotFoundException(`Job with id '${id}' not found`);
     return job;
   }
 
-  update(id: number, updateJobDto: UpdateJobDto) {
+  update(id: number, updateJobDto: UpdateJobDto, currentUser: IAuthUser) {
     return updateJobDto;
   }
 
-  remove(id: number) {
+  remove(id: number, currentUser: IAuthUser) {
     return `This action removes a #${id} job`;
   }
 }
