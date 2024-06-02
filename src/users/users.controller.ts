@@ -44,6 +44,13 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  @Post('/admin')
+  @ApiCreatedResponse({ description: 'Admin User Registered', type: User })
+  @ApiBadRequestResponse({ description: 'Admin User Registration Failed' })
+  createAdmin(@Body() createUserDto: CreateUserDto) {
+    return this.userService.createAdmin(createUserDto);
+  }
+
   @Get()
   @ApiOkResponse({
     description: 'All Users with Profile',

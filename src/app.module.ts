@@ -24,6 +24,8 @@ import { EventsModule } from './events/events.module';
 import { Event } from './events/entities/event.entity';
 import { NewsModule } from './news/news.module';
 import { News } from './news/entities/news.entity';
+import { JobsModule } from './jobs/jobs.module';
+import { Job } from './jobs/entities/job.entity';
 
 @Module({
   imports: [
@@ -45,6 +47,7 @@ import { News } from './news/entities/news.entity';
         Registration,
         Event,
         News,
+        Job,
       ],
       synchronize: true,
     }),
@@ -59,6 +62,7 @@ import { News } from './news/entities/news.entity';
     SurveyModule,
     EventsModule,
     NewsModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

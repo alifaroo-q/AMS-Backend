@@ -25,10 +25,26 @@ export class UserService {
     private fileHelper: FilesHelper,
   ) {}
 
-  async create(userDetails: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     const newUser = this.userRepository.create({
-      ...userDetails,
+      ...createUserDto,
       role: RolesEnum.User,
+    });
+
+    const createdUser = await this.userRepository.save(newUser);
+
+    if (!this.fileHelper.createAlumniFolder(createdUser))
+      throw new ForbiddenException(
+        'Something Went Wrong - Folder Write failed!',
+      );
+
+    return createdUser;
+  }
+
+  async createAdmin(createUserDto: CreateUserDto) {
+    const newUser = this.userRepository.create({
+      ...createUserDto,
+      role: RolesEnum.Admin,
     });
 
     const createdUser = await this.userRepository.save(newUser);

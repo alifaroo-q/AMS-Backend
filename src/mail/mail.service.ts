@@ -38,8 +38,8 @@ export class MailService {
           domain: process.env.DOMAIN || 'https://alumni.dsu.edu.pk',
           link:
             type === 'internal'
-              ? '/registrations/validateUniEmail'
-              : '/registrations/validateAccountEmail',
+              ? '/api/registrations/validateUniEmail'
+              : '/api/registrations/validateAccountEmail',
         },
       });
 

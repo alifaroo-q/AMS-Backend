@@ -4,6 +4,7 @@ import { Experience } from 'src/experiences/entities/experience.entity';
 import { Profile } from 'src/profiles/entities/profile.entity';
 import { Skill } from 'src/skills/entities/skill.entity';
 import { Survey } from 'src/survey/entities/survey.entity';
+import { Job } from '../../jobs/entities/job.entity';
 import {
   Column,
   CreateDateColumn,
@@ -102,4 +103,7 @@ export class User {
 
   @OneToMany(() => Experience, (experience) => experience.user)
   experiences: Experience[];
+
+  @OneToMany(() => Job, (job) => job.user)
+  jobs: Job[];
 }

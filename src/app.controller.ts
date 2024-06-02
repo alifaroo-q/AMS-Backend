@@ -76,6 +76,6 @@ export class AppController {
     return `This is a deployed Service for Alumni Management System,
     " https://ams-service-production.up.railway.app/api " 
     is no longer active, the new root url is : => 
-    " https://amsbackend-ghub.onrender.com/api "`;
+    " https://ams-backend-gkxg.onrender.com/docs"`;
   }
 }
