@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { IAuthUser } from '../auth/types/auth-user.type';
@@ -35,27 +39,30 @@ export class JobsService {
     return await this.jobRepository.save(job);
   }
 
-  async approve(currentUser: IAuthUser, jobId: number) {
-    const job = await this.jobRepository.findOneBy({ id: jobId });
+  async approve(currentUser: IAuthUser, id: number) {
+    if (currentUser.role !== RolesEnum.Admin)
+      throw new ForbiddenException('User not authorized to approve jobs');
+
+    const job = await this.jobRepository.findOneBy({ id });
 
     if (!job)
-      throw new NotFoundException(
-        `Cannot find job with provided id '${jobId}'`,
-      );
+      throw new NotFoundException(`Cannot find job with provided id '${id}'`);
 
     if (job.isApproved) return job;
-    const user = await this.userRepository.findOneBy({ id: currentUser.id });
 
-    if (user.role === RolesEnum.Admin) job.isApproved = true;
+    job.isApproved = true;
     return this.jobRepository.save(job);
   }
 
   async findAll() {
-    return await this.jobRepository.find();
+    return await this.jobRepository.find({ order: { updatedAt: 'DESC' } });
   }
 
   async findAllUnApproved() {
-    return await this.jobRepository.find({ where: { isApproved: false } });
+    return await this.jobRepository.find({
+      where: { isApproved: false },
+      order: { updatedAt: 'DESC' },
+    });
   }
 
   async findOne(id: number) {
@@ -64,11 +71,33 @@ export class JobsService {
     return job;
   }
 
-  update(id: number, updateJobDto: UpdateJobDto, currentUser: IAuthUser) {
-    return updateJobDto;
+  async update(id: number, updateJobDto: UpdateJobDto, currentUser: IAuthUser) {
+    const job = await this.jobRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+
+    if (!job)
+      throw new NotFoundException(`Cannot find job with provided id '${id}'`);
+
+    if (currentUser.role === RolesEnum.Admin || currentUser.id === job.user.id)
+      return await this.jobRepository.update(id, updateJobDto);
+
+    throw new ForbiddenException('User not authorized to update jobs');
   }
 
-  remove(id: number, currentUser: IAuthUser) {
-    return `This action removes a #${id} job`;
+  async remove(id: number, currentUser: IAuthUser) {
+    const job = await this.jobRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+
+    if (!job)
+      throw new NotFoundException(`Cannot find job with provided id '${id}'`);
+
+    if (currentUser.role === RolesEnum.Admin || currentUser.id === job.user.id)
+      return await this.jobRepository.delete(id);
+
+    throw new ForbiddenException('User not authorized to delete jobs');
   }
 }

@@ -37,10 +37,10 @@ export class JobsController {
   @UseGuards(JwtAuthGuard)
   @Post('/approve')
   approve(
-    @Body('jobId', ParseIntPipe) jobId: number,
+    @Body('id', ParseIntPipe) id: number,
     @AuthUser() currentUser: IAuthUser,
   ) {
-    return this.jobsService.approve(currentUser, jobId);
+    return this.jobsService.approve(currentUser, id);
   }
 
   @Get()
@@ -58,6 +58,7 @@ export class JobsController {
     return this.jobsService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -67,6 +68,7 @@ export class JobsController {
     return this.jobsService.update(id, updateJobDto, currentUser);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(
     @Param('id', ParseIntPipe) id: number,

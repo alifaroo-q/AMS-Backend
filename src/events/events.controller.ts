@@ -24,7 +24,6 @@ import { constants } from '../../utils/constants';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { MulterFileUpload } from '../../utils/file-upload.multer';
 
 @ApiTags('Events')
@@ -32,7 +31,6 @@ import { MulterFileUpload } from '../../utils/file-upload.multer';
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
-  // @UseGuards(JwtAuthGuard)
   @Post()
   @ApiCreatedResponse({ description: 'Event Created', type: Event })
   @UseInterceptors(
@@ -72,7 +70,6 @@ export class EventsController {
     return this.eventsService.findOne(id);
   }
 
-  // @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiCreatedResponse({ description: 'Event with provided Id updated' })
   @ApiNotFoundResponse({
@@ -100,7 +97,6 @@ export class EventsController {
     return this.eventsService.update(id, updateEventDto, event_image);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiOkResponse({ description: 'Event with provided Id deleted' })
   remove(@Param('id', ParseIntPipe) id: number) {
