@@ -26,6 +26,8 @@ import { NewsModule } from './news/news.module';
 import { News } from './news/entities/news.entity';
 import { JobsModule } from './jobs/jobs.module';
 import { Job } from './jobs/entities/job.entity';
+import { CorporatePartnersModule } from './corporate-partners/corporate-partners.module';
+import { CorporatePartner } from './corporate-partners/entities/corporate-partner.entity';
 
 @Module({
   imports: [
@@ -48,6 +50,7 @@ import { Job } from './jobs/entities/job.entity';
         Event,
         News,
         Job,
+        CorporatePartner,
       ],
       synchronize: true,
     }),
@@ -63,6 +66,7 @@ import { Job } from './jobs/entities/job.entity';
     EventsModule,
     NewsModule,
     JobsModule,
+    CorporatePartnersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
