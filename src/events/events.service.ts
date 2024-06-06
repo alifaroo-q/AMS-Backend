@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,10 +6,13 @@ import { Event } from './entities/event.entity';
 import { Repository } from 'typeorm';
 import { constants } from '../../utils/constants';
 import * as fs from 'fs';
+import { unlink } from 'fs/promises';
 import * as path from 'path';
 
 @Injectable()
 export class EventsService {
+  private logger = new Logger(EventsService.name);
+
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
@@ -17,10 +20,19 @@ export class EventsService {
 
   async create(
     createEventDto: CreateEventDto,
-    event_image: Express.Multer.File,
+    event_images: Array<Express.Multer.File>,
   ) {
-    const event = this.eventRepository.create(createEventDto);
-    if (event_image) event.event_image = event_image.filename;
+    const event_images_filename: string[] = [];
+
+    event_images.forEach((event_image) => {
+      event_images_filename.push(event_image.filename);
+    });
+
+    const event = this.eventRepository.create({
+      ...createEventDto,
+      event_images: event_images_filename,
+    });
+
     return await this.eventRepository.save(event);
   }
 
@@ -34,38 +46,11 @@ export class EventsService {
     return event;
   }
 
-  async update(
-    id: number,
-    updateEventDto: UpdateEventDto,
-    event_image: Express.Multer.File,
-  ) {
+  async update(id: number, updateEventDto: UpdateEventDto) {
+    console.log(updateEventDto);
     const event = await this.eventRepository.findOneBy({ id });
-
     if (!event) throw new NotFoundException(`Event with id '${id}' not found`);
-
-    const event_image_path = path.join(
-      constants.EVENT_UPLOAD_LOCATION,
-      event.event_image,
-    );
-
-    if (
-      event_image &&
-      event.event_image !== constants.DEFAULT_EVENT &&
-      fs.existsSync(event_image_path)
-    ) {
-      fs.unlink(event_image_path, function (err) {
-        if (err) console.log(err);
-      });
-
-      return this.eventRepository.update(id, {
-        ...updateEventDto,
-        event_image: event_image.filename,
-      });
-    }
-
-    return this.eventRepository.update(id, {
-      ...updateEventDto,
-    });
+    return await this.eventRepository.update(id, updateEventDto);
   }
 
   async remove(id: number) {
@@ -73,19 +58,30 @@ export class EventsService {
 
     if (!event) throw new NotFoundException(`Event with id '${id}' not found`);
 
-    const event_image = path.join(
-      constants.EVENT_UPLOAD_LOCATION,
-      event.event_image,
-    );
+    const event_images_path: string[] = [];
 
-    if (
-      fs.existsSync(event_image) &&
-      event.event_image !== constants.DEFAULT_EVENT
-    )
-      fs.unlink(event_image, function (err) {
-        if (err) console.log(err);
+    event.event_images.forEach((event_image) => {
+      const image_path = path.join(
+        constants.EVENT_UPLOAD_LOCATION,
+        event_image,
+      );
+      event_images_path.push(image_path);
+    });
+
+    try {
+      const deleteEventImages = event_images_path.map((image_path) => {
+        return new Promise((resolve, reject) => {
+          if (fs.existsSync(image_path)) {
+            resolve(unlink(image_path));
+          }
+          reject(new Error(`'${image_path}' not found`));
+        });
       });
 
-    return await this.eventRepository.delete({ id });
+      await Promise.all(deleteEventImages);
+      return await this.eventRepository.delete({ id });
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 }

@@ -2,6 +2,7 @@ import * as path from 'path';
 import { BadRequestException } from '@nestjs/common';
 import { diskStorage } from 'multer';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
+import { v4 as uuid } from 'uuid';
 
 export const MulterFileUpload = (options: {
   uploadLocation: string;
@@ -24,7 +25,7 @@ export const MulterFileUpload = (options: {
       destination: options.uploadLocation,
       filename: (req: any, file, cb) => {
         const fn = path.parse(file.originalname);
-        const filename = `${fn.name}-${new Date().getTime()}${fn.ext}`;
+        const filename = `${fn.name}_${uuid()}${fn.ext}`;
         cb(null, filename);
       },
     }),

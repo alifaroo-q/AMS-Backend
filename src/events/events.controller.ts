@@ -7,10 +7,9 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  UploadedFile,
   ParseIntPipe,
   ParseFilePipe,
-  UseGuards,
+  UploadedFiles,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -23,7 +22,7 @@ import { EventsService } from './events.service';
 import { constants } from '../../utils/constants';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { MulterFileUpload } from '../../utils/file-upload.multer';
 
 @ApiTags('Events')
@@ -34,24 +33,25 @@ export class EventsController {
   @Post()
   @ApiCreatedResponse({ description: 'Event Created', type: Event })
   @UseInterceptors(
-    FileInterceptor(
-      'event_image',
+    FilesInterceptor(
+      'event_images',
+      10,
       MulterFileUpload({
         allowedFiles: ['.png', '.jpg', '.jpeg'],
         uploadLocation: constants.EVENT_UPLOAD_LOCATION,
       }),
     ),
   )
-  create(
+  createEvent(
     @Body() createEventDto: CreateEventDto,
-    @UploadedFile(
+    @UploadedFiles(
       new ParseFilePipe({
-        fileIsRequired: false,
+        fileIsRequired: true,
       }),
     )
-    event_image: Express.Multer.File,
+    event_images: Array<Express.Multer.File>,
   ) {
-    return this.eventsService.create(createEventDto, event_image);
+    return this.eventsService.create(createEventDto, event_images);
   }
 
   @Get()
@@ -75,26 +75,11 @@ export class EventsController {
   @ApiNotFoundResponse({
     description: 'Event with provided Id not found, update failed',
   })
-  @UseInterceptors(
-    FileInterceptor(
-      'event_image',
-      MulterFileUpload({
-        allowedFiles: ['.png', '.jpg', '.jpeg'],
-        uploadLocation: constants.EVENT_UPLOAD_LOCATION,
-      }),
-    ),
-  )
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEventDto: UpdateEventDto,
-    @UploadedFile(
-      new ParseFilePipe({
-        fileIsRequired: false,
-      }),
-    )
-    event_image: Express.Multer.File,
   ) {
-    return this.eventsService.update(id, updateEventDto, event_image);
+    return this.eventsService.update(id, updateEventDto);
   }
 
   @Delete(':id')
