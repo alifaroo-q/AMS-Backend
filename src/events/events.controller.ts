@@ -42,7 +42,7 @@ export class EventsController {
       }),
     ),
   )
-  createEvent(
+  create(
     @Body() createEventDto: CreateEventDto,
     @UploadedFiles(
       new ParseFilePipe({

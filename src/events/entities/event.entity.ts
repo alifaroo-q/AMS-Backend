@@ -32,7 +32,7 @@ export class Event {
   @Column()
   date: Date;
 
-  @ApiProperty({ default: constants.DEFAULT_EVENT })
+  @ApiProperty()
   @Column('text', { array: true })
   event_images: string[];
 

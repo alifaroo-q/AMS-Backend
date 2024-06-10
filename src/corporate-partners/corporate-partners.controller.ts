@@ -6,10 +6,19 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
+  UseInterceptors,
+  ParseFilePipe,
+  UploadedFile,
+  UseFilters,
 } from '@nestjs/common';
 import { CorporatePartnersService } from './corporate-partners.service';
 import { CreateCorporatePartnerDto } from './dto/create-corporate-partner.dto';
 import { UpdateCorporatePartnerDto } from './dto/update-corporate-partner.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { MulterFileUpload } from '../../utils/file-upload.multer';
+import { constants } from '../../utils/constants';
+import { RemoveFileOnFailedValidationFilter } from '../../utils/RemoveFileOnFailedValidation.filter';
 
 @Controller('corporate-partners')
 export class CorporatePartnersController {
@@ -18,8 +27,29 @@ export class CorporatePartnersController {
   ) {}
 
   @Post()
-  create(@Body() createCorporatePartnerDto: CreateCorporatePartnerDto) {
-    return this.corporatePartnersService.create(createCorporatePartnerDto);
+  @UseFilters(RemoveFileOnFailedValidationFilter)
+  @UseInterceptors(
+    FileInterceptor(
+      'image',
+      MulterFileUpload({
+        allowedFiles: ['.png', '.jpg', '.jpeg'],
+        uploadLocation: constants.CORPORATE_PARTNER_UPLOAD_LOCATION,
+      }),
+    ),
+  )
+  create(
+    @Body() createCorporatePartnerDto: CreateCorporatePartnerDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: true,
+      }),
+    )
+    image: Express.Multer.File,
+  ) {
+    return this.corporatePartnersService.create(
+      createCorporatePartnerDto,
+      image,
+    );
   }
 
   @Get()
@@ -28,20 +58,40 @@ export class CorporatePartnersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.corporatePartnersService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.corporatePartnersService.findOne(id);
   }
 
   @Patch(':id')
+  @UseFilters(RemoveFileOnFailedValidationFilter)
+  @UseInterceptors(
+    FileInterceptor(
+      'image',
+      MulterFileUpload({
+        allowedFiles: ['.png', '.jpg', '.jpeg'],
+        uploadLocation: constants.CORPORATE_PARTNER_UPLOAD_LOCATION,
+      }),
+    ),
+  )
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateCorporatePartnerDto: UpdateCorporatePartnerDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: false,
+      }),
+    )
+    image: Express.Multer.File,
   ) {
-    return this.corporatePartnersService.update(+id, updateCorporatePartnerDto);
+    return this.corporatePartnersService.update(
+      id,
+      updateCorporatePartnerDto,
+      image,
+    );
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.corporatePartnersService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.corporatePartnersService.remove(id);
   }
 }

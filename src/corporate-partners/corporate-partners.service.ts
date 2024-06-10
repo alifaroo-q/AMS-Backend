@@ -1,26 +1,106 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCorporatePartnerDto } from './dto/create-corporate-partner.dto';
 import { UpdateCorporatePartnerDto } from './dto/update-corporate-partner.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CorporatePartner } from './entities/corporate-partner.entity';
+import { Repository } from 'typeorm';
+import * as path from 'path';
+import { constants } from '../../utils/constants';
+import * as fs from 'fs';
 
 @Injectable()
 export class CorporatePartnersService {
-  create(createCorporatePartnerDto: CreateCorporatePartnerDto) {
-    return 'This action adds a new corporatePartner';
+  constructor(
+    @InjectRepository(CorporatePartner)
+    private readonly corporatePartnerRepository: Repository<CorporatePartner>,
+  ) {}
+
+  async create(
+    createCorporatePartnerDto: CreateCorporatePartnerDto,
+    image: Express.Multer.File,
+  ) {
+    const corporatePartner = this.corporatePartnerRepository.create({
+      ...createCorporatePartnerDto,
+      image: image.filename,
+    });
+
+    return await this.corporatePartnerRepository.save(corporatePartner);
   }
 
-  findAll() {
-    return `This action returns all corporatePartners`;
+  async findAll() {
+    return await this.corporatePartnerRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} corporatePartner`;
+  async findOne(id: number) {
+    const corporatePartner = await this.corporatePartnerRepository.findOneBy({
+      id,
+    });
+
+    if (!corporatePartner)
+      throw new NotFoundException(
+        `corporate partner with id '${id}' not found`,
+      );
+
+    return corporatePartner;
   }
 
-  update(id: number, updateCorporatePartnerDto: UpdateCorporatePartnerDto) {
-    return `This action updates a #${id} corporatePartner`;
+  async update(
+    id: number,
+    updateCorporatePartnerDto: UpdateCorporatePartnerDto,
+    image: Express.Multer.File,
+  ) {
+    const corporatePartner = await this.corporatePartnerRepository.findOneBy({
+      id,
+    });
+
+    if (!corporatePartner)
+      throw new NotFoundException(
+        `Corporate partner with id '${id}' not found`,
+      );
+
+    const corporatePartnerImagePath = path.join(
+      constants.CORPORATE_PARTNER_UPLOAD_LOCATION,
+      corporatePartner.image,
+    );
+
+    if (image) {
+      if (fs.existsSync(corporatePartnerImagePath)) {
+        fs.unlink(corporatePartnerImagePath, function (err) {
+          if (err) console.log(err);
+        });
+      }
+
+      return this.corporatePartnerRepository.update(id, {
+        ...updateCorporatePartnerDto,
+        image: image.filename,
+      });
+    }
+
+    return this.corporatePartnerRepository.update(id, {
+      ...updateCorporatePartnerDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} corporatePartner`;
+  async remove(id: number) {
+    const corporatePartner = await this.corporatePartnerRepository.findOneBy({
+      id,
+    });
+
+    if (!corporatePartner)
+      throw new NotFoundException(
+        `Corporate partner with id '${id}' not found`,
+      );
+
+    const corporatePartnerImage = path.join(
+      constants.CORPORATE_PARTNER_UPLOAD_LOCATION,
+      corporatePartner.image,
+    );
+
+    if (fs.existsSync(corporatePartnerImage))
+      fs.unlink(corporatePartnerImage, function (err) {
+        if (err) console.log(err);
+      });
+
+    return await this.corporatePartnerRepository.delete({ id });
   }
 }
