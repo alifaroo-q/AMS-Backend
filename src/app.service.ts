@@ -1,8 +1,31 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './users/entities/users.entity';
+import { Repository } from 'typeorm';
+import { AlumniDto } from '../utils/alumni.dto';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+  ) {}
+
+  async getAllAlumni(): Promise<AlumniDto[]> {
+    const alumniAll = await this.userRepository.find({
+      relations: { experiences: true },
+    });
+
+    return alumniAll.map(
+      ({ id, avatar, first_name, last_name, middle_name, experiences }) => {
+        return {
+          avatar,
+          first_name,
+          id,
+          last_name,
+          middle_name,
+          designation: experiences.length ? experiences[0].designation : '',
+        };
+      },
+    );
   }
 }

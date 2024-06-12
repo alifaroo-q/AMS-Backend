@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   ParseFilePipe,
   UploadedFiles,
+  UseFilters,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -24,6 +25,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { MulterFileUpload } from '../../utils/file-upload.multer';
+import { RemoveFilesOnFailedValidationFilter } from '../../utils/RemoveFilesOnFailedValidation.filter';
 
 @ApiTags('Events')
 @Controller('events')
@@ -31,6 +33,7 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
+  @UseFilters(RemoveFilesOnFailedValidationFilter)
   @ApiCreatedResponse({ description: 'Event Created', type: Event })
   @UseInterceptors(
     FilesInterceptor(

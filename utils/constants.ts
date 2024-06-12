@@ -4,5 +4,4 @@ export const constants = {
   NEWS_UPLOAD_LOCATION: './files/news',
   CORPORATE_PARTNER_UPLOAD_LOCATION: './files/corporate-partner',
   DEFAULT_AVATAR: 'default/avatar.jpg',
-  DEFAULT_NEWS: 'news-placeholder.png',
 };

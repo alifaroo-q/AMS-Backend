@@ -14,8 +14,10 @@ export class NewsService {
     @InjectRepository(News) private readonly newsRepository: Repository<News>,
   ) {}
   async create(createNewsDto: CreateNewsDto, news_image: Express.Multer.File) {
-    const news = this.newsRepository.create(createNewsDto);
-    if (news_image) news.news_image = news_image.filename;
+    const news = this.newsRepository.create({
+      ...createNewsDto,
+      news_image: news_image.filename,
+    });
     return await this.newsRepository.save(news);
   }
 
@@ -43,14 +45,12 @@ export class NewsService {
       news.news_image,
     );
 
-    if (
-      news_image &&
-      news.news_image !== constants.DEFAULT_NEWS &&
-      fs.existsSync(news_image_path)
-    ) {
-      fs.unlink(news_image_path, function (err) {
-        if (err) console.log(err);
-      });
+    if (news_image) {
+      if (fs.existsSync(news_image_path)) {
+        fs.unlink(news_image_path, function (err) {
+          if (err) console.log(err);
+        });
+      }
 
       return this.newsRepository.update(id, {
         ...updateNewsDto,
@@ -73,7 +73,7 @@ export class NewsService {
       news.news_image,
     );
 
-    if (fs.existsSync(news_image) && news.news_image !== constants.DEFAULT_NEWS)
+    if (fs.existsSync(news_image))
       fs.unlink(news_image, function (err) {
         if (err) console.log(err);
       });

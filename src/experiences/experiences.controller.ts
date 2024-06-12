@@ -6,17 +6,19 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
-import { ExperiencesService } from './experiences.service';
-import { CreateExperienceDto } from './dto/create-experience.dto';
-import { UpdateExperienceDto } from './dto/update-experience.dto';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
+
 import { Experience } from './entities/experience.entity';
+import { CreateExperienceDto } from './dto/create-experience.dto';
+import { ExperiencesService } from './experiences.service';
+import { UpdateExperienceDto } from './dto/update-experience.dto';
 
 @ApiTags('Experiences')
 @Controller('experiences')
@@ -30,10 +32,10 @@ export class ExperiencesController {
   })
   @ApiBadRequestResponse({ description: 'Experience Registration Failed' })
   create(
-    @Param('userId') userId: string,
+    @Param('userId', ParseIntPipe) id: number,
     @Body() createExperienceDto: CreateExperienceDto,
   ) {
-    return this.experiencesService.create(+userId, createExperienceDto);
+    return this.experiencesService.create(id, createExperienceDto);
   }
 
   @Get()
@@ -50,32 +52,32 @@ export class ExperiencesController {
     description: 'All Experience for a User',
     type: [Experience],
   })
-  findAllforUser(@Param('userId') id: string) {
-    return this.experiencesService.findAllforUser(+id);
+  findAllForUser(@Param('userId', ParseIntPipe) id: number) {
+    return this.experiencesService.findAllForUser(id);
   }
 
   @Get(':id')
   @ApiOkResponse({ description: 'Experience by Id', type: Experience })
   @ApiBadRequestResponse({ description: 'Exp Not Found' })
-  findOne(@Param('id') id: string) {
-    return this.experiencesService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.experiencesService.findOne(id);
   }
 
   @Patch(':id')
   @ApiCreatedResponse({ description: 'Experience Update' })
   @ApiBadRequestResponse({ description: 'Experience Update Failed' })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateExperienceDto: UpdateExperienceDto,
   ) {
-    return this.experiencesService.update(+id, updateExperienceDto);
+    return this.experiencesService.update(id, updateExperienceDto);
   }
 
   @Delete(':id')
   @ApiOkResponse({
     description: 'Experience Deleted',
   })
-  remove(@Param('id') id: string) {
-    return this.experiencesService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.experiencesService.remove(id);
   }
 }

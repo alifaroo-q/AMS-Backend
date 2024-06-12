@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -25,34 +26,28 @@ export class ProfilesService {
       where: { id: userId },
       relations: { profile: true },
     });
-    if (!user)
-      throw new HttpException('User Not Found', HttpStatus.BAD_REQUEST);
+
+    if (!user) throw new BadRequestException('User Not Found');
     else if (user.profile != null) {
-      throw new HttpException(
-        'User Profile Previously Exists',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException('User Profile Previously Exists');
     }
-    const createProfile = this.profileRepository.create(createProfileDto);
-    createProfile.user = user;
-    //const errors = await validate(createProfile);
-    //if (errors.length > 0)
-    // throw new HttpException(
-    //   'Validation failed!',
-    //   HttpStatus.EXPECTATION_FAILED,
-    // );
-    return this.profileRepository.save(createProfile);
+
+    const newProfile = this.profileRepository.create(createProfileDto);
+    newProfile.user = user;
+
+    return await this.profileRepository.save(newProfile);
   }
 
-  findAll() {
-    return this.profileRepository.find();
+  async findAll() {
+    return await this.profileRepository.find();
   }
 
-  async findAllforUser(id: number) {
+  async findForUser(id: number) {
     const user = await this.userRepository.findOneBy({ id });
-    if (!user)
-      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
-    return this.profileRepository.findOne({
+
+    if (!user) throw new BadRequestException('User not found');
+
+    return await this.profileRepository.findOne({
       where: {
         user: {
           id,
@@ -61,19 +56,19 @@ export class ProfilesService {
     });
   }
 
-  findOne(id: number) {
-    return this.profileRepository.findOne({
+  async findOne(id: number) {
+    return await this.profileRepository.findOne({
       where: { id },
       relations: ['user'],
     });
   }
 
-  update(id: number, updateProfileDto: UpdateProfileDto) {
-    return this.profileRepository.update(id, updateProfileDto);
+  async update(id: number, updateProfileDto: UpdateProfileDto) {
+    return await this.profileRepository.update(id, updateProfileDto);
   }
 
-  remove(id: number) {
-    return this.profileRepository.delete(id);
+  async remove(id: number) {
+    return await this.profileRepository.delete(id);
   }
 
   async updateResume(id: number, file: Express.Multer.File) {

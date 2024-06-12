@@ -1,37 +1,33 @@
 import {
-  Controller,
   Get,
   Post,
   Body,
   Patch,
   Param,
-  Request,
   Delete,
+  Controller,
+  UploadedFile,
   UseInterceptors,
   ParseIntPipe,
-  UploadedFile,
-  ParseFilePipe,
-  FileTypeValidator,
-  MaxFileSizeValidator,
-  HttpException,
-  HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
-import { ProfilesService } from './profiles.service';
-import { CreateProfileDto } from './dto/create-profile.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Profile } from './entities/profile.entity';
-import { FileInterceptor } from '@nestjs/platform-express';
+
+import { parse } from 'path';
 import { diskStorage } from 'multer';
 import { constants } from 'utils/constants';
-import { parse } from 'path';
 import FilesHelper from 'files/FilesHelper';
-import { ProfileResumeUserInterceptor } from 'utils/profileResumeUser.interceptor';
+import { Profile } from './entities/profile.entity';
+import { ProfilesService } from './profiles.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateProfileDto } from './dto/create-profile.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ProfileResumeUserInterceptor } from 'src/profiles/profileResumeUser.interceptor';
 
 @ApiTags('Profiles')
 @Controller('profiles')
@@ -42,10 +38,10 @@ export class ProfilesController {
   @ApiCreatedResponse({ description: 'Profile Created', type: Profile })
   @ApiBadRequestResponse({ description: 'Profile Creation Failed' })
   create(
-    @Param('userId') userId: string,
+    @Param('userId', ParseIntPipe) userId: number,
     @Body() createProfileDto: CreateProfileDto,
   ) {
-    return this.profilesService.create(+userId, createProfileDto);
+    return this.profilesService.create(userId, createProfileDto);
   }
 
   @Get()
@@ -62,30 +58,33 @@ export class ProfilesController {
     description: 'Profile for a User',
     type: [Profile],
   })
-  findAllforUser(@Param('userId') id: string) {
-    return this.profilesService.findAllforUser(+id);
+  findForUser(@Param('userId', ParseIntPipe) id: number) {
+    return this.profilesService.findForUser(id);
   }
 
   @Get(':id')
   @ApiOkResponse({ description: 'Profile by Id', type: Profile })
   @ApiBadRequestResponse({ description: 'Profile Not Found' })
-  findOne(@Param('id') id: string) {
-    return this.profilesService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.profilesService.findOne(id);
   }
 
   @Patch(':id')
   @ApiCreatedResponse({ description: 'Profile Update' })
   @ApiBadRequestResponse({ description: 'Profile Update Failed' })
-  update(@Param('id') id: string, @Body() updateProfileDto: UpdateProfileDto) {
-    return this.profilesService.update(+id, updateProfileDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProfileDto: UpdateProfileDto,
+  ) {
+    return this.profilesService.update(id, updateProfileDto);
   }
 
   @Delete(':id')
   @ApiOkResponse({
     description: 'Profile Deleted',
   })
-  remove(@Param('id') id: string) {
-    return this.profilesService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.profilesService.remove(id);
   }
 
   @Post(':id/uploadResume')
@@ -106,10 +105,7 @@ export class ProfilesController {
         ) {
           req.fileValidationError = 'Invalid file type';
           return callback(
-            new HttpException(
-              'Invalid File Type ' + ext,
-              HttpStatus.BAD_REQUEST,
-            ),
+            new BadRequestException('Invalid File Type ' + ext),
             false,
           );
         }
@@ -118,31 +114,25 @@ export class ProfilesController {
       storage: diskStorage({
         destination: constants.UPLOAD_LOCATION,
         filename: (req: any, file, cb) => {
-          req.userId = req.custom.userId;
-          const unique = new Date().getTime();
           const fn = parse(file.originalname);
-          const filename = `${req.userId}/profileResume/${req.params.id}${fn.ext}`;
+          const filename = `${req.custom.userId}/profileResume/${req.params.id}${fn.ext}`;
+
           const fileSys = new FilesHelper();
-          if (req.custom.resume) {
-            console.log('deleting folder: Start');
+          if (req.custom.resume)
             fileSys.removeFolderOrFile(
               constants.UPLOAD_LOCATION + req.custom.resume,
             );
-            console.log('deleting folder: End');
-          }
-          console.log('creating folder: Start');
+
           fileSys.createAlumniResumeFolder({ userId: req.userId });
-          console.log('creating folder: End');
           cb(null, filename);
         },
       }),
     }),
   )
   uploadFile(
-    @Param('id', ParseIntPipe) id: string,
-    @Request() req,
+    @Param('id', ParseIntPipe) id: number,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.profilesService.updateResume(+id, file);
+    return this.profilesService.updateResume(id, file);
   }
 }

@@ -1,10 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/users.entity';
-import { Repository } from 'typeorm';
+import { Experience } from './entities/experience.entity';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
-import { Experience } from './entities/experience.entity';
 
 @Injectable()
 export class ExperiencesService {
@@ -14,29 +14,31 @@ export class ExperiencesService {
     private experienceRepository: Repository<Experience>,
   ) {}
 
-  async create(userId: number, createExperienceDto: CreateExperienceDto) {
+  async create(id: number, createExperienceDto: CreateExperienceDto) {
     const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: { profile: true, skills: true },
+      where: { id },
     });
-    if (!user)
-      throw new HttpException('User Not Found', HttpStatus.BAD_REQUEST);
+
+    if (!user) throw new BadRequestException('User Not Found');
+
     const newExp = this.experienceRepository.create({
       ...createExperienceDto,
       user,
     });
-    return this.experienceRepository.save(newExp);
+
+    return await this.experienceRepository.save(newExp);
   }
 
-  findAll() {
-    return this.experienceRepository.find();
+  async findAll() {
+    return await this.experienceRepository.find();
   }
 
-  async findAllforUser(id: number) {
+  async findAllForUser(id: number) {
     const user = await this.userRepository.findOneBy({ id });
-    if (!user)
-      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
-    return this.experienceRepository.find({
+
+    if (!user) throw new BadRequestException('User not found');
+
+    return await this.experienceRepository.find({
       where: {
         user: {
           id,
@@ -45,15 +47,15 @@ export class ExperiencesService {
     });
   }
 
-  findOne(id: number) {
-    return this.experienceRepository.findOneBy({ id });
+  async findOne(id: number) {
+    return await this.experienceRepository.findOneBy({ id });
   }
 
-  update(id: number, updateExperienceDto: UpdateExperienceDto) {
-    return this.experienceRepository.update(id, updateExperienceDto);
+  async update(id: number, updateExperienceDto: UpdateExperienceDto) {
+    return await this.experienceRepository.update(id, updateExperienceDto);
   }
 
-  remove(id: number) {
-    return this.experienceRepository.delete(id);
+  async remove(id: number) {
+    return await this.experienceRepository.delete(id);
   }
 }

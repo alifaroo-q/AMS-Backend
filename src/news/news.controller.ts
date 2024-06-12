@@ -10,6 +10,7 @@ import {
   UploadedFile,
   ParseFilePipe,
   ParseIntPipe,
+  UseFilters,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
@@ -24,6 +25,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterFileUpload } from '../../utils/file-upload.multer';
 import { constants } from '../../utils/constants';
 import { News } from './entities/news.entity';
+import { RemoveFileOnFailedValidationFilter } from '../../utils/RemoveFileOnFailedValidation.filter';
 
 @ApiTags('News')
 @Controller('news')
@@ -31,6 +33,7 @@ export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
   @Post()
+  @UseFilters(RemoveFileOnFailedValidationFilter)
   @ApiCreatedResponse({ description: 'News Created', type: News })
   @UseInterceptors(
     FileInterceptor(
@@ -45,7 +48,7 @@ export class NewsController {
     @Body() createNewsDto: CreateNewsDto,
     @UploadedFile(
       new ParseFilePipe({
-        fileIsRequired: false,
+        fileIsRequired: true,
       }),
     )
     news_image: Express.Multer.File,
@@ -70,6 +73,7 @@ export class NewsController {
   }
 
   @Patch(':id')
+  @UseFilters(RemoveFileOnFailedValidationFilter)
   @ApiCreatedResponse({ description: 'News with provided Id updated' })
   @ApiNotFoundResponse({
     description: 'News with provided Id not found, update failed',

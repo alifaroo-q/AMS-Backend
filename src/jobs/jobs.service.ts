@@ -1,15 +1,15 @@
 import {
-  ForbiddenException,
   Injectable,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { Job } from './entities/job.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
-import { IAuthUser } from '../auth/types/auth-user.type';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Job } from './entities/job.entity';
-import { Repository } from 'typeorm';
 import { User } from '../users/entities/users.entity';
+import { IAuthUser } from '../auth/types/auth-user.type';
 
 enum RolesEnum {
   'Admin' = 1,
@@ -51,7 +51,7 @@ export class JobsService {
     if (job.isApproved) return job;
 
     job.isApproved = true;
-    return this.jobRepository.save(job);
+    return await this.jobRepository.save(job);
   }
 
   async findAll() {

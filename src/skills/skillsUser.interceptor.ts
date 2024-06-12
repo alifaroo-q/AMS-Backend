@@ -3,10 +3,8 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  HttpException,
-  HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { SkillsService } from 'src/skills/skills.service';
 
@@ -14,22 +12,16 @@ import { SkillsService } from 'src/skills/skills.service';
 export class SkillsUserInterceptor implements NestInterceptor {
   constructor(private readonly skillsService: SkillsService) {}
 
-  async intercept(
-    context: ExecutionContext,
-    next: CallHandler,
-  ): Promise<Observable<any>> {
+  async intercept(context: ExecutionContext, next: CallHandler) {
     const req = context.switchToHttp().getRequest();
-    const skill_user = await this.skillsService.findSkillWithUser(
-      req.params.id,
-    );
-    if (!skill_user)
-      throw new HttpException('Skill not found', HttpStatus.BAD_REQUEST);
+    const skill_user = await this.skillsService.findWithUser(req.params.id);
 
-    if (skill_user)
-      req.custom = {
-        userId: skill_user.user.id,
-        certificate: skill_user.certificate,
-      };
+    if (!skill_user) throw new BadRequestException('Skill not found');
+
+    req.custom = {
+      userId: skill_user.user.id,
+      certificate: skill_user.certificate,
+    };
 
     return next.handle().pipe(
       tap((data) => {

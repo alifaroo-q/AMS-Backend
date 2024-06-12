@@ -32,8 +32,8 @@ export class News {
   @Column()
   date: Date;
 
-  @ApiProperty({ default: constants.DEFAULT_NEWS })
-  @Column({ default: constants.DEFAULT_NEWS })
+  @ApiProperty()
+  @Column()
   news_image: string;
 
   @ApiProperty()

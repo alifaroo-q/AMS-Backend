@@ -54,6 +54,7 @@ import { CorporatePartner } from './corporate-partners/entities/corporate-partne
       ],
       synchronize: true,
     }),
+    TypeOrmModule.forFeature([User]),
     UserModule,
     AuthModule,
     AcademicsModule,

@@ -9,9 +9,6 @@ import {
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
-import { JobsService } from './jobs.service';
-import { CreateJobDto } from './dto/create-job.dto';
-import { UpdateJobDto } from './dto/update-job.dto';
 import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
@@ -19,12 +16,16 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthUser } from '../auth/decorator/user.decorator';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { IAuthUser } from '../auth/types/auth-user.type';
-import { Serialize } from '../../utils/serialize.interceptor';
+
 import { JobDto } from './dto/job.dto';
 import { Job } from './entities/job.entity';
+import { JobsService } from './jobs.service';
+import { CreateJobDto } from './dto/create-job.dto';
+import { UpdateJobDto } from './dto/update-job.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { IAuthUser } from '../auth/types/auth-user.type';
+import { AuthUser } from '../auth/decorator/user.decorator';
+import { Serialize } from '../../utils/serialize.interceptor';
 
 @ApiTags('Jobs')
 @Controller('jobs')

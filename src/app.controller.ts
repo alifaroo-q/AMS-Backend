@@ -7,22 +7,24 @@ import {
   Body,
   Query,
 } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { AuthService } from './auth/auth.service';
-import { ApplyResetPasswordDto } from './auth/dto/apply-reset-password.dto';
+import { AppService } from './app.service';
 import { LoginDto } from './auth/dto/login.dto';
-import { ResetPasswordDto } from './auth/dto/reset-password.dto';
+import { AlumniDto } from '../utils/alumni.dto';
+import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { LocalAuthGuard } from './auth/local-auth.guard';
-import { MailService } from './mail/mail.service';
+import { ResetPasswordDto } from './auth/dto/reset-password.dto';
+import { SerializeAll } from '../utils/serialize-all.interceptor';
+import { ApplyResetPasswordDto } from './auth/dto/apply-reset-password.dto';
+import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Auth')
 @Controller()
 export class AppController {
   constructor(
     private readonly authService: AuthService,
-    private readonly mailService: MailService,
+    private readonly appService: AppService,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -69,6 +71,12 @@ export class AppController {
     console.log(user);
     const { sub, eml, sys, sts, iat, exp, role } = user;
     return { sub, eml, sys, sts, iat, exp, role };
+  }
+
+  @Get('/allAlumni')
+  @SerializeAll(AlumniDto)
+  getAllAlumni() {
+    return this.appService.getAllAlumni();
   }
 
   @Get()
