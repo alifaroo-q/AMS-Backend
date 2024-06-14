@@ -71,15 +71,15 @@ export class JobsController {
   }
 
   @Get(':id')
-  @ApiOkResponse({ description: 'Job with provided Id', type: Job })
-  @ApiNotFoundResponse({ description: 'Job with provided not found' })
+  @ApiOkResponse({ description: 'Job with provided id', type: Job })
+  @ApiNotFoundResponse({ description: 'Job with provided id not found' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.jobsService.findOne(id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  @ApiCreatedResponse({ description: 'Job with provided Id updated' })
+  @ApiCreatedResponse({ description: 'Job with provided id updated' })
   @ApiForbiddenResponse({ description: 'User not authorized to update jobs' })
   @ApiNotFoundResponse({
     description: 'Job with provided Id not found, update failed',
@@ -94,7 +94,7 @@ export class JobsController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  @ApiOkResponse({ description: 'Job with provided Id deleted' })
+  @ApiOkResponse({ description: 'Job with provided id deleted' })
   @ApiForbiddenResponse({ description: 'User not authorized to delete jobs' })
   remove(
     @Param('id', ParseIntPipe) id: number,

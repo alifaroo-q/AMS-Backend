@@ -19,7 +19,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterFileUpload } from '../../utils/file-upload.multer';
 import { constants } from '../../utils/constants';
 import { RemoveFileOnFailedValidationFilter } from '../../utils/RemoveFileOnFailedValidation.filter';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Corporate Partners')
 @Controller('corporate-partners')
 export class CorporatePartnersController {
   constructor(
