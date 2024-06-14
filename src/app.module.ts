@@ -28,6 +28,8 @@ import { JobsModule } from './jobs/jobs.module';
 import { Job } from './jobs/entities/job.entity';
 import { CorporatePartnersModule } from './corporate-partners/corporate-partners.module';
 import { CorporatePartner } from './corporate-partners/entities/corporate-partner.entity';
+import { TestimonialModule } from './testimonial/testimonial.module';
+import { Testimonial } from './testimonial/entities/testimonial.entity';
 
 @Module({
   imports: [
@@ -51,6 +53,7 @@ import { CorporatePartner } from './corporate-partners/entities/corporate-partne
         News,
         Job,
         CorporatePartner,
+        Testimonial,
       ],
       synchronize: true,
     }),
@@ -68,6 +71,7 @@ import { CorporatePartner } from './corporate-partners/entities/corporate-partne
     NewsModule,
     JobsModule,
     CorporatePartnersModule,
+    TestimonialModule,
   ],
   controllers: [AppController],
   providers: [AppService],

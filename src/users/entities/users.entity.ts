@@ -17,6 +17,7 @@ import {
 //import { IsDate, IsEmail, Min, Max } from 'class-validator';
 
 import { constants } from 'utils/constants';
+import { Testimonial } from '../../testimonial/entities/testimonial.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -106,4 +107,7 @@ export class User {
 
   @OneToMany(() => Job, (job) => job.user)
   jobs: Job[];
+
+  @OneToOne(() => Testimonial, (testimony) => testimony.user)
+  testimony: Testimonial;
 }

@@ -19,11 +19,11 @@ export class AppService {
       ({ id, avatar, first_name, last_name, middle_name, experiences }) => {
         return {
           avatar,
+          designation: experiences.length ? experiences[0].designation : '',
           first_name,
           id,
           last_name,
           middle_name,
-          designation: experiences.length ? experiences[0].designation : '',
         };
       },
     );
