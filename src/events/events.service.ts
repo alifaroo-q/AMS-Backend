@@ -70,11 +70,11 @@ export class EventsService {
 
     try {
       const deleteEventImages = event_images_path.map((image_path) => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
           if (fs.existsSync(image_path)) {
             resolve(unlink(image_path));
           }
-          reject(new Error(`'${image_path}' not found`));
+          resolve(`${image_path} not found`);
         });
       });
 

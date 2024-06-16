@@ -67,9 +67,7 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('protected')
   getHello(@Req() req: any): any {
-    const user = req.user;
-    console.log(user);
-    const { sub, eml, sys, sts, iat, exp, role } = user;
+    const { sub, eml, sys, sts, iat, exp, role } = req.user;
     return { sub, eml, sys, sts, iat, exp, role };
   }
 
