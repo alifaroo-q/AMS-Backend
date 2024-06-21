@@ -18,6 +18,7 @@ import {
 
 import { constants } from 'utils/constants';
 import { Testimonial } from '../../testimonial/entities/testimonial.entity';
+import { AlumniCard } from '../../alumni-card/entities/alumni-card.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -110,4 +111,7 @@ export class User {
 
   @OneToOne(() => Testimonial, (testimony) => testimony.user)
   testimony: Testimonial;
+
+  @OneToOne(() => AlumniCard, (alumni_card) => alumni_card.user)
+  alumni_card: AlumniCard;
 }

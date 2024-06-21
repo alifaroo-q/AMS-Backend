@@ -30,6 +30,8 @@ import { CorporatePartnersModule } from './corporate-partners/corporate-partners
 import { CorporatePartner } from './corporate-partners/entities/corporate-partner.entity';
 import { TestimonialModule } from './testimonial/testimonial.module';
 import { Testimonial } from './testimonial/entities/testimonial.entity';
+import { AlumniCardModule } from './alumni-card/alumni-card.module';
+import { AlumniCard } from './alumni-card/entities/alumni-card.entity';
 
 @Module({
   imports: [
@@ -54,6 +56,7 @@ import { Testimonial } from './testimonial/entities/testimonial.entity';
         Job,
         CorporatePartner,
         Testimonial,
+        AlumniCard,
       ],
       synchronize: true,
     }),
@@ -72,6 +75,7 @@ import { Testimonial } from './testimonial/entities/testimonial.entity';
     JobsModule,
     CorporatePartnersModule,
     TestimonialModule,
+    AlumniCardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
