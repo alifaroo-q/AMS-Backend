@@ -13,11 +13,12 @@ import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiResponse,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { Serialize } from '../../utils/serialize.interceptor';
 import { AlumniCardDto } from './dto/alumni-card.dto';
-import { CorporatePartner } from '../corporate-partners/entities/corporate-partner.entity';
 import { AlumniCard } from './entities/alumni-card.entity';
 
 @ApiTags('AlumniCard')
@@ -33,7 +34,7 @@ export class AlumniCardController {
   @ApiBadRequestResponse({
     description: 'Alumni card is approved, collect it from alumni department',
   })
-  @ApiBadRequestResponse({
+  @ApiUnprocessableEntityResponse({
     description: 'Alumni card is already requested',
   })
   @Serialize(AlumniCardDto)

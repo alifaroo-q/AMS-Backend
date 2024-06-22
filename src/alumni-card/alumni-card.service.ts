@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateAlumniCardDto } from './dto/create-alumni-card.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -30,7 +31,9 @@ export class AlumniCardService {
     }
 
     if (user.alumni_card && user.alumni_card.isRequested) {
-      throw new BadRequestException('Alumni card is already requested');
+      throw new UnprocessableEntityException(
+        'Alumni card is already requested',
+      );
     }
 
     const alumniCard = this.alumniCardRepository.create({
