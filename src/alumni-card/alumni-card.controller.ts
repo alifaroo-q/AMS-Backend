@@ -13,7 +13,6 @@ import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
-  ApiResponse,
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
@@ -74,6 +73,7 @@ export class AlumniCardController {
   @ApiNotFoundResponse({
     description: 'Alumni card request with provided id not found',
   })
+  @Serialize(AlumniCardDto)
   approve(@Param('id', ParseIntPipe) id: number) {
     return this.alumniCardService.approve(id);
   }

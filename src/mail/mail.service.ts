@@ -4,6 +4,7 @@ import * as SendGrid from '@sendgrid/mail';
 
 const EMAIL_CONFIRMATION_TEMPLATE = 'd-4759f0a5731b4f2888f92ff24843b719';
 const PASSWORD_CHANGE_TEMPLATE = 'd-8fb05ae60f064c408b20b25df31101a7';
+const ALUMNI_CARD_APPROVAL_TEMPLATE = 'd-5b0c18e922704978b4d5dbc9127c7b96';
 
 @Injectable()
 export class MailService {
@@ -16,6 +17,22 @@ export class MailService {
   private async sendGridMail(mail: SendGrid.MailDataRequired) {
     try {
       return await SendGrid.send(mail);
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  public async sendAlumniCardApprovalEmail(to: string) {
+    try {
+      const response = await this.sendGridMail({
+        to,
+        from: process.env.MAIL_FROM,
+        subject: 'Alumni Card Approved & Ready To Collect',
+        html: 'Alumni Card Approval',
+        templateId: ALUMNI_CARD_APPROVAL_TEMPLATE,
+      });
+
+      this.logger.log(response);
     } catch (error) {
       this.logger.error(error);
     }

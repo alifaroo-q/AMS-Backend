@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AlumniCard } from './entities/alumni-card.entity';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/users.entity';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AlumniCardService {
@@ -16,6 +17,7 @@ export class AlumniCardService {
     @InjectRepository(AlumniCard)
     private readonly alumniCardRepository: Repository<AlumniCard>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly mailService: MailService,
   ) {}
 
   async create(createAlumniCardDto: CreateAlumniCardDto) {
@@ -58,7 +60,10 @@ export class AlumniCardService {
   }
 
   async approve(id: number) {
-    const alumniCard = await this.alumniCardRepository.findOneBy({ id });
+    const alumniCard = await this.alumniCardRepository.findOne({
+      where: { id },
+      relations: { user: true },
+    });
 
     if (!alumniCard)
       throw new NotFoundException(`Alumni card with id '${id}' not found`);
@@ -69,6 +74,8 @@ export class AlumniCardService {
       );
 
     alumniCard.isApproved = true;
+    await this.mailService.sendAlumniCardApprovalEmail(alumniCard.user.email);
+
     return await this.alumniCardRepository.save(alumniCard);
   }
 }
