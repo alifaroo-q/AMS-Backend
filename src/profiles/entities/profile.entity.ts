@@ -17,7 +17,7 @@ export class Profile {
   id: number;
 
   @ApiProperty({ description: 'date of birth', example: '2020-12-25 05:00:00' })
-  @Column()
+  @Column({ default: new Date().toJSON().slice(0, 10) })
   //@MinDate(new Date('2020-12-25')) //--- have to use validate method for it
   date_of_birth: Date;
 
