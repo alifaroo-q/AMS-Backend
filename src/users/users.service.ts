@@ -32,11 +32,11 @@ export class UserService {
     });
 
     const newProfile = this.profileRepository.create({
-      user: newUser,
       country: 'PK',
       timezone: 'Karachi',
     });
 
+    newProfile.user = newUser;
     await this.profileRepository.save(newProfile);
     const createdUser = await this.userRepository.save(newUser);
 
