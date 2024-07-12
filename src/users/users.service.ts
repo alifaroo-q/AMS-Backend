@@ -37,8 +37,8 @@ export class UserService {
       timezone: 'Karachi',
     });
 
-    const createdUser = await this.userRepository.save(newUser);
     await this.profileRepository.save(newProfile);
+    const createdUser = await this.userRepository.save(newUser);
 
     if (!this.fileHelper.createAlumniFolder(createdUser))
       throw new ForbiddenException(
