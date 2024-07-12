@@ -140,35 +140,35 @@ export class CreateSurveyDto {
     example: '1',
   })
   @IsNotEmpty()
-  q20: number;
+  q20: string;
 
   @ApiProperty({
     description: 'Choice Question (1 to 5)',
     example: '1',
   })
   @IsNotEmpty()
-  q21: number;
+  q21: string;
 
   @ApiProperty({
     description: 'Choice Question (1 to 5)',
     example: '1',
   })
   @IsNotEmpty()
-  q22: number;
+  q22: string;
 
   @ApiProperty({
     description: 'Choice Question (1 to 5)',
     example: '1',
   })
   @IsNotEmpty()
-  q23: number;
+  q23: string;
 
   @ApiProperty({
     description: 'Choice Question (1 to 5)',
     example: '1',
   })
   @IsNotEmpty()
-  q24: number;
+  q24: string;
 
   @ApiProperty({
     description: 'Custom string',
