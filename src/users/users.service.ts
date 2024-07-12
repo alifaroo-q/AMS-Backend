@@ -31,14 +31,15 @@ export class UserService {
       role: RolesEnum.User,
     });
 
+    const createdUser = await this.userRepository.save(newUser);
+
     const newProfile = this.profileRepository.create({
+      user: createdUser,
       country: 'PK',
       timezone: 'Karachi',
     });
 
-    newProfile.user = newUser;
     await this.profileRepository.save(newProfile);
-    const createdUser = await this.userRepository.save(newUser);
 
     if (!this.fileHelper.createAlumniFolder(createdUser))
       throw new ForbiddenException(
