@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import FilesHelper from 'files/FilesHelper';
@@ -11,6 +12,7 @@ import { CreateUserParams, UpdateUserParams } from 'utils/types';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { User } from './entities/users.entity';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 enum RolesEnum {
   'Admin' = 1,
@@ -215,6 +217,21 @@ export class UserService {
     });
 
     return this.userRepository.update({ id }, { ...more });
+  }
+
+  async changePassword(userId: number, changePasswordDto: ChangePasswordDto) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+
+    if (!user)
+      throw new BadRequestException(`User not found with id '${userId}'`);
+
+    if (user.password !== changePasswordDto.currentPassword) {
+      throw new UnauthorizedException(`Wrong password provided, try again`);
+    }
+
+    return await this.userRepository.update(userId, {
+      password: changePasswordDto.newPassword,
+    });
   }
 
   updatePassword(id: number, password: string) {

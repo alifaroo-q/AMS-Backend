@@ -28,6 +28,7 @@ import { constants } from 'utils/constants';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { User } from './entities/users.entity';
 import { UserService } from './users.service';
 
@@ -49,6 +50,14 @@ export class UserController {
   @ApiBadRequestResponse({ description: 'Admin User Registration Failed' })
   createAdmin(@Body() createUserDto: CreateUserDto) {
     return this.userService.createAdmin(createUserDto);
+  }
+
+  @Post('/changePassword/:userId')
+  changePassword(
+    @Body() changePasswordDto: ChangePasswordDto,
+    @Param('userId', ParseIntPipe) userId: number,
+  ) {
+    return this.userService.changePassword(userId, changePasswordDto);
   }
 
   @Get()
