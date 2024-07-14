@@ -24,11 +24,14 @@ export class TestimonialService {
   async create({ userId, testimony }: CreateTestimonialDto) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: { experiences: true },
+      relations: { experiences: true, testimony: true },
     });
 
     if (!user)
       throw new NotFoundException(`User with id '${userId}' not found`);
+
+    if (user.testimony)
+      throw new BadRequestException('User can only have one testimony');
 
     if (
       !(
