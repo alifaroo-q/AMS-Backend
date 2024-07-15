@@ -13,4 +13,6 @@ export class AlumniDto {
   avatar: string;
   @Expose()
   designation: string;
+  @Expose()
+  role: number;
 }

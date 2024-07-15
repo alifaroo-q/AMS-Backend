@@ -26,13 +26,13 @@ export class AppService {
         role,
       }) => {
         return {
+          role,
           avatar,
           designation: experiences.length ? experiences[0].designation : '',
           first_name,
           id,
           last_name,
           middle_name,
-          role,
         };
       },
     );
