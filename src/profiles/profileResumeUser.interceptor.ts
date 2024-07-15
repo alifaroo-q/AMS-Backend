@@ -15,11 +15,11 @@ export class ProfileResumeUserInterceptor implements NestInterceptor {
   async intercept(context: ExecutionContext, next: CallHandler) {
     const req = context.switchToHttp().getRequest();
 
-    const profile = await this.profilesService.findOne(req.params.id);
+    const profile = await this.profilesService.findForUser(req.params.userId);
     if (!profile) throw new BadRequestException('Profile not found');
 
     req.custom = {
-      userId: profile.user.id,
+      id: profile.id,
       resume: profile.resume,
     };
 

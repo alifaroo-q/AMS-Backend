@@ -72,6 +72,9 @@ export class ProfilesService {
   }
 
   async updateResume(id: number, file: Express.Multer.File) {
-    return this.profileRepository.update({ id }, { resume: file.filename });
+    return this.profileRepository.update(
+      { user: { id } },
+      { resume: file.filename },
+    );
   }
 }

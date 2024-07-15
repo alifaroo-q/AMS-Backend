@@ -16,7 +16,15 @@ export class AppService {
     });
 
     return alumniAll.map(
-      ({ id, avatar, first_name, last_name, middle_name, experiences }) => {
+      ({
+        id,
+        avatar,
+        first_name,
+        last_name,
+        middle_name,
+        experiences,
+        role,
+      }) => {
         return {
           avatar,
           designation: experiences.length ? experiences[0].designation : '',
@@ -24,6 +32,7 @@ export class AppService {
           id,
           last_name,
           middle_name,
+          role,
         };
       },
     );

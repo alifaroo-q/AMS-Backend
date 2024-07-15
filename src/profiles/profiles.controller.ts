@@ -87,7 +87,7 @@ export class ProfilesController {
     return this.profilesService.remove(id);
   }
 
-  @Post(':id/uploadResume')
+  @Post(':userId/uploadResume')
   @ApiOkResponse({
     description:
       'Resume Upload Successfully - Request Body: multipart/form-data, Field Name: file',
@@ -115,7 +115,7 @@ export class ProfilesController {
         destination: constants.UPLOAD_LOCATION,
         filename: (req: any, file, cb) => {
           const fn = parse(file.originalname);
-          const filename = `${req.custom.userId}/profileResume/${req.params.id}${fn.ext}`;
+          const filename = `${req.param.userId}/profileResume/${req.custom.id}${fn.ext}`;
 
           const fileSys = new FilesHelper();
           if (req.custom.resume)
@@ -123,16 +123,16 @@ export class ProfilesController {
               constants.UPLOAD_LOCATION + req.custom.resume,
             );
 
-          fileSys.createAlumniResumeFolder({ userId: req.userId });
+          fileSys.createAlumniResumeFolder({ userId: req.param.userId });
           cb(null, filename);
         },
       }),
     }),
   )
   uploadFile(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('userId', ParseIntPipe) userId: number,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.profilesService.updateResume(id, file);
+    return this.profilesService.updateResume(userId, file);
   }
 }
