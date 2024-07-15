@@ -9,9 +9,10 @@ import { IsUniEmailUnique } from './dto/IsUniEmailUnique';
 import { IsPhoneAvailable } from './dto/IsPhoneAvailable';
 //import { ProfilesService } from 'src/profiles/profiles.service';
 import { Profile } from 'src/profiles/entities/profile.entity';
+import { Registration } from '../registrations/entities/registration.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Profile, User])],
+  imports: [TypeOrmModule.forFeature([Profile, User, Registration])],
   controllers: [UserController],
   providers: [
     UserService,
