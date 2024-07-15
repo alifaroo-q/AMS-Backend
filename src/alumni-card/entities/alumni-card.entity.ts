@@ -28,7 +28,7 @@ export class AlumniCard {
   @Column({ default: false })
   isRequested: boolean;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: User;
 }

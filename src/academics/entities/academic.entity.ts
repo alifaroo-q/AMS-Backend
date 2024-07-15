@@ -79,6 +79,6 @@ export class Academic {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
   user: User;
 }

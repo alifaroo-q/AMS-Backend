@@ -60,6 +60,11 @@ export class UserController {
     return this.userService.changePassword(userId, changePasswordDto);
   }
 
+  @Get('/directory')
+  alumniForDirectory() {
+    return this.userService.alumniForDirectory();
+  }
+
   @Get()
   @ApiOkResponse({
     description: 'All Users with Profile',

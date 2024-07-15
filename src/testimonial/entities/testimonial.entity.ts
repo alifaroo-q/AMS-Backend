@@ -50,7 +50,7 @@ export class Testimonial {
   @Column()
   testimony: string;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: User;
 }

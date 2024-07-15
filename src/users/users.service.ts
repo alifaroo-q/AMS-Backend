@@ -2,17 +2,21 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import FilesHelper from 'files/FilesHelper';
 import { Profile } from 'src/profiles/entities/profile.entity';
 import { Repository } from 'typeorm';
-import { CreateUserParams, UpdateUserParams } from 'utils/types';
+import { UpdateUserParams } from 'utils/types';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { User } from './entities/users.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { constants } from '../../utils/constants';
+import * as path from 'path';
+import { Registration } from '../registrations/entities/registration.entity';
 
 enum RolesEnum {
   'Admin' = 1,
@@ -24,6 +28,8 @@ export class UserService {
   constructor(
     @InjectRepository(Profile) private profileRepository: Repository<Profile>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Registration)
+    private registrationRepository: Repository<Registration>,
     private fileHelper: FilesHelper,
   ) {}
 
@@ -65,6 +71,35 @@ export class UserService {
       );
 
     return createdUser;
+  }
+
+  async alumniForDirectory() {
+    const allAlumni = await this.userRepository.find({
+      where: { role: 2 },
+      relations: {
+        experiences: true,
+        academics: true,
+        profile: true,
+      },
+    });
+
+    return allAlumni.map((alumni) => {
+      return {
+        id: alumni.id,
+        first_name: alumni.first_name,
+        middle_name: alumni.middle_name,
+        last_name: alumni.last_name,
+        uni_email: alumni.uni_email,
+        email: alumni.email,
+        phone: alumni.phone,
+        noOfJobsPosted: alumni.jobs.length,
+        company: alumni.experiences[0].company,
+        designation: alumni.experiences[0].designation,
+        qualification: alumni.academics[0].qualification,
+        date_of_birth: alumni.profile.date_of_birth,
+        avatar: alumni.avatar,
+      };
+    });
   }
 
   findAll() {
@@ -249,7 +284,29 @@ export class UserService {
     return this.userRepository.update({ id }, { avatar: file.filename });
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    const user = await this.userRepository.findOneBy({ id });
+
+    if (!user)
+      throw new NotFoundException(`User with provided id '${id}' not found`);
+
+    const registration = await this.registrationRepository.findOneBy({
+      uni_email: user.uni_email,
+    });
+
+    registration.uni_token = null;
+    registration.email_token = null;
+    registration.email_sent = 0;
+    registration.uni_email_sent = 0;
+    registration.email_verified = false;
+    registration.uni_verified = false;
+    registration.step = 0;
+
+    await this.registrationRepository.save(registration);
+
+    const files = path.join(constants.UPLOAD_LOCATION, String(id));
+    this.fileHelper.removeFolderOrFile(files);
+
     return this.userRepository.delete({ id });
   }
 }

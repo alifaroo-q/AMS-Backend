@@ -212,7 +212,7 @@ export class Survey {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: User;
 }
