@@ -92,12 +92,12 @@ export class UserService {
         uni_email: alumni.uni_email,
         email: alumni.email,
         phone: alumni.phone,
-        noOfJobsPosted: alumni.jobs ? alumni.jobs.length : 0,
-        company: alumni.experiences ? alumni.experiences[0].company : '',
-        designation: alumni.experiences
+        noOfJobsPosted: alumni.jobs.length ? alumni.jobs.length : 0,
+        company: alumni.experiences.length ? alumni.experiences[0].company : '',
+        designation: alumni.experiences.length
           ? alumni.experiences[0].designation
           : '',
-        qualification: alumni.academics
+        qualification: alumni.academics.length
           ? alumni.academics[0].qualification
           : '',
         date_of_birth: alumni.profile.date_of_birth,
