@@ -98,11 +98,7 @@ export class ProfilesController {
       limits: { fileSize: 4 * 1024 * 1024 },
       fileFilter: (req, file, callback) => {
         const ext = parse(file.originalname).ext;
-        if (
-          !['.pdf', '.doc', '.docx', '.html', '.png', '.jpeg', '.jpg'].includes(
-            ext,
-          )
-        ) {
+        if (!['.pdf', '.doc', '.docx'].includes(ext)) {
           req.fileValidationError = 'Invalid file type';
           return callback(
             new BadRequestException('Invalid File Type ' + ext),
@@ -120,7 +116,7 @@ export class ProfilesController {
           const fileSys = new FilesHelper();
           if (req.custom.resume)
             fileSys.removeFolderOrFile(
-              constants.UPLOAD_LOCATION + req.custom.resume,
+              constants.UPLOAD_LOCATION + req.param.userId + '/profileResume',
             );
 
           fileSys.createAlumniResumeFolder({ userId: req.param.userId });
