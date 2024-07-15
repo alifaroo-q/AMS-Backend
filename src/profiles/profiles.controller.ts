@@ -96,17 +96,17 @@ export class ProfilesController {
     ProfileResumeUserInterceptor,
     FileInterceptor('file', {
       limits: { fileSize: 4 * 1024 * 1024 },
-      fileFilter: (req, file, callback) => {
-        const ext = parse(file.originalname).ext;
-        if (!['.pdf', '.doc', '.docx'].includes(ext)) {
-          req.fileValidationError = 'Invalid file type';
-          return callback(
-            new BadRequestException('Invalid File Type ' + ext),
-            false,
-          );
-        }
-        return callback(null, true);
-      },
+      // fileFilter: (req, file, callback) => {
+      //   const ext = parse(file.originalname).ext;
+      //   if (!['.pdf', '.doc', '.docx'].includes(ext)) {
+      //     req.fileValidationError = 'Invalid file type';
+      //     return callback(
+      //       new BadRequestException('Invalid File Type ' + ext),
+      //       false,
+      //     );
+      //   }
+      //   return callback(null, true);
+      // },
       storage: diskStorage({
         destination: constants.UPLOAD_LOCATION,
         filename: (req: any, file, cb) => {
