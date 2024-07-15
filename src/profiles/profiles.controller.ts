@@ -111,15 +111,15 @@ export class ProfilesController {
         destination: constants.UPLOAD_LOCATION,
         filename: (req: any, file, cb) => {
           const fn = parse(file.originalname);
-          const filename = `${req.param.userId}/profileResume/${req.custom.id}${fn.ext}`;
+          const filename = `${req.params.userId}/profileResume/${req.custom.id}${fn.ext}`;
 
           const fileSys = new FilesHelper();
           if (req.custom.resume)
             fileSys.removeFolderOrFile(
-              constants.UPLOAD_LOCATION + req.param.userId + '/profileResume',
+              constants.UPLOAD_LOCATION + req.params.userId + '/profileResume',
             );
 
-          fileSys.createAlumniResumeFolder({ userId: req.param.userId });
+          fileSys.createAlumniResumeFolder({ userId: req.params.userId });
           cb(null, filename);
         },
       }),
