@@ -29,6 +29,7 @@ export class AppService {
           role,
           avatar,
           designation: experiences.length ? experiences[0].designation : '',
+          company: experiences.length ? experiences[0].company : '',
           first_name,
           id,
           last_name,

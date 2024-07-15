@@ -15,4 +15,6 @@ export class AlumniDto {
   designation: string;
   @Expose()
   role: number;
+  @Expose()
+  company: string;
 }
