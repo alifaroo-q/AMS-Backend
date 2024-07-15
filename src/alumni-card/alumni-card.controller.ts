@@ -19,6 +19,7 @@ import {
 import { Serialize } from '../../utils/serialize.interceptor';
 import { AlumniCardDto } from './dto/alumni-card.dto';
 import { AlumniCard } from './entities/alumni-card.entity';
+import { SerializeAll } from '../../utils/serialize-all.interceptor';
 
 @ApiTags('AlumniCard')
 @Controller('alumni-card')
@@ -46,6 +47,7 @@ export class AlumniCardController {
     description: 'All request alumni cards',
     type: [AlumniCard],
   })
+  @SerializeAll(AlumniCardDto)
   findAllRequested() {
     return this.alumniCardService.findAllRequested();
   }
@@ -58,6 +60,7 @@ export class AlumniCardController {
   @ApiNotFoundResponse({
     description: 'Alumni card request with provided id not found',
   })
+  @Serialize(AlumniCardDto)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.alumniCardService.findOne(id);
   }

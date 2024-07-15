@@ -47,7 +47,10 @@ export class AlumniCardService {
   }
 
   async findOne(id: number) {
-    const alumniCard = await this.alumniCardRepository.findOneBy({ id });
+    const alumniCard = await this.alumniCardRepository.findOne({
+      where: { id },
+      relations: { user: true },
+    });
     if (!alumniCard)
       throw new NotFoundException(`Alumni card with id '${id}' not found`);
     return alumniCard;
@@ -56,6 +59,7 @@ export class AlumniCardService {
   async findAllRequested() {
     return await this.alumniCardRepository.find({
       where: { isRequested: true },
+      relations: { user: true },
     });
   }
 
