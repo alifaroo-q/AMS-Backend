@@ -80,6 +80,7 @@ export class UserService {
         experiences: true,
         academics: true,
         profile: true,
+        jobs: true,
       },
     });
 
