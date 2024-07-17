@@ -295,19 +295,21 @@ export class UserService {
     if (!user)
       throw new NotFoundException(`User with provided id '${id}' not found`);
 
-    const registration = await this.registrationRepository.findOneBy({
-      uni_email: user.uni_email,
-    });
+    if (user.role === 2) {
+      const registration = await this.registrationRepository.findOneBy({
+        uni_email: user.uni_email,
+      });
 
-    registration.uni_token = null;
-    registration.email_token = null;
-    registration.email_sent = 0;
-    registration.uni_email_sent = 0;
-    registration.email_verified = false;
-    registration.uni_verified = false;
-    registration.step = 0;
+      registration.uni_token = null;
+      registration.email_token = null;
+      registration.email_sent = 0;
+      registration.uni_email_sent = 0;
+      registration.email_verified = false;
+      registration.uni_verified = false;
+      registration.step = 0;
 
-    await this.registrationRepository.save(registration);
+      await this.registrationRepository.save(registration);
+    }
 
     const files = path.join(constants.UPLOAD_LOCATION, String(id));
     this.fileHelper.removeFolderOrFile(files);
