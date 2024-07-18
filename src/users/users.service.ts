@@ -43,7 +43,7 @@ export class UserService {
 
     const newProfile = this.profileRepository.create({
       user: createdUser,
-      country: 'PK',
+      country: 'Pakistan',
       timezone: 'Karachi',
     });
 

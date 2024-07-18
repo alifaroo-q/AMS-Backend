@@ -37,7 +37,7 @@ export class EventsService {
   }
 
   async findAll() {
-    return await this.eventRepository.find();
+    return await this.eventRepository.find({ order: { createdAt: 'DESC' } });
   }
 
   async findOne(id: number) {
