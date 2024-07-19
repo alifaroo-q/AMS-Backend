@@ -21,6 +21,7 @@ import { Testimonial } from './entities/testimonial.entity';
 import { Serialize } from '../../utils/serialize.interceptor';
 import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
 import { CreateTestimonialDto } from './dto/create-testimonial.dto';
+import { SerializeAll } from '../../utils/serialize-all.interceptor';
 
 @ApiTags('Testimonials')
 @Controller('testimonial')
@@ -35,6 +36,7 @@ export class TestimonialController {
   }
 
   @Get()
+  @SerializeAll(TestimonialDto)
   @ApiOkResponse({
     description: 'All testimonials',
     type: [Testimonial],
@@ -44,6 +46,7 @@ export class TestimonialController {
   }
 
   @Get(':id')
+  @Serialize(TestimonialDto)
   @ApiOkResponse({
     description: 'Testimonial with provided Id',
     type: Testimonial,

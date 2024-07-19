@@ -66,11 +66,14 @@ export class TestimonialService {
   }
 
   async findAll() {
-    return await this.testimonialRepository.find();
+    return await this.testimonialRepository.find({ relations: { user: true } });
   }
 
   async findOne(id: number) {
-    const testimony = await this.testimonialRepository.findOneBy({ id });
+    const testimony = await this.testimonialRepository.findOne({
+      where: { id },
+      relations: { user: true },
+    });
     if (!testimony)
       throw new NotFoundException(`Testimony with id '${id}' not found`);
 
