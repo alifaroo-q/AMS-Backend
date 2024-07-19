@@ -11,9 +11,12 @@ import { User } from 'src/users/entities/users.entity';
 import FilesHelper from 'files/FilesHelper';
 import { IsPhoneAvailable } from 'src/users/dto/IsPhoneAvailable';
 import { Profile } from 'src/profiles/entities/profile.entity';
+import { AlumniCard } from '../alumni-card/entities/alumni-card.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Registration, User, Profile])],
+  imports: [
+    TypeOrmModule.forFeature([Registration, User, AlumniCard, Profile]),
+  ],
   controllers: [RegistrationsController],
   providers: [
     RegistrationsService,
