@@ -3,10 +3,9 @@ import { AlumniCardService } from './alumni-card.service';
 import { AlumniCardController } from './alumni-card.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AlumniCard } from './entities/alumni-card.entity';
-import { User } from '../users/entities/users.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AlumniCard, User])],
+  imports: [TypeOrmModule.forFeature([AlumniCard])],
   controllers: [AlumniCardController],
   providers: [AlumniCardService],
 })

@@ -8,7 +8,6 @@ import { CreateAlumniCardDto } from './dto/create-alumni-card.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AlumniCard } from './entities/alumni-card.entity';
 import { Repository } from 'typeorm';
-import { User } from '../users/entities/users.entity';
 import { MailService } from '../mail/mail.service';
 
 @Injectable()
@@ -16,7 +15,6 @@ export class AlumniCardService {
   constructor(
     @InjectRepository(AlumniCard)
     private readonly alumniCardRepository: Repository<AlumniCard>,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly mailService: MailService,
   ) {}
 

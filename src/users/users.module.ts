@@ -10,9 +10,12 @@ import { IsPhoneAvailable } from './dto/IsPhoneAvailable';
 //import { ProfilesService } from 'src/profiles/profiles.service';
 import { Profile } from 'src/profiles/entities/profile.entity';
 import { Registration } from '../registrations/entities/registration.entity';
+import { AlumniCard } from '../alumni-card/entities/alumni-card.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Profile, User, Registration])],
+  imports: [
+    TypeOrmModule.forFeature([Profile, User, Registration, AlumniCard]),
+  ],
   controllers: [UserController],
   providers: [
     UserService,
