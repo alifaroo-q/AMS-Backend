@@ -43,7 +43,10 @@ export class JobsService {
     if (currentUser.role !== RolesEnum.Admin)
       throw new ForbiddenException('User not authorized to approve jobs');
 
-    const job = await this.jobRepository.findOneBy({ id });
+    const job = await this.jobRepository.findOne({
+      where: { id },
+      relations: { user: true },
+    });
 
     if (!job)
       throw new NotFoundException(`Cannot find job with provided id '${id}'`);
@@ -55,19 +58,28 @@ export class JobsService {
   }
 
   async findAll() {
-    return await this.jobRepository.find({ order: { updatedAt: 'DESC' } });
+    return await this.jobRepository.find({
+      order: { updatedAt: 'DESC' },
+      relations: { user: true },
+    });
   }
 
   async findAllUnApproved() {
     return await this.jobRepository.find({
       where: { isApproved: false },
       order: { updatedAt: 'DESC' },
+      relations: { user: true },
     });
   }
 
   async findOne(id: number) {
-    const job = await this.jobRepository.findOneBy({ id });
+    const job = await this.jobRepository.findOne({
+      where: { id },
+      relations: { user: true },
+    });
+
     if (!job) throw new NotFoundException(`Job with id '${id}' not found`);
+
     return job;
   }
 

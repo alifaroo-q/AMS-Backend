@@ -1,13 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, ParseIntPipe } from '@nestjs/common';
 import { AlumniCardService } from './alumni-card.service';
-import { CreateAlumniCardDto } from './dto/create-alumni-card.dto';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -26,7 +18,7 @@ import { SerializeAll } from '../../utils/serialize-all.interceptor';
 export class AlumniCardController {
   constructor(private readonly alumniCardService: AlumniCardService) {}
 
-  @Post()
+  @Post(':userId')
   @ApiCreatedResponse({
     description: 'alumni card request created',
     type: AlumniCard,
@@ -38,8 +30,8 @@ export class AlumniCardController {
     description: 'Alumni card is already requested',
   })
   @Serialize(AlumniCardDto)
-  requestAlumniCard(@Body() createAlumniCardDto: CreateAlumniCardDto) {
-    return this.alumniCardService.requestAlumniCard(createAlumniCardDto);
+  requestAlumniCard(@Param('userId') userId: number) {
+    return this.alumniCardService.requestAlumniCard(userId);
   }
 
   @Get()

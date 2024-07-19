@@ -4,7 +4,6 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { CreateAlumniCardDto } from './dto/create-alumni-card.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AlumniCard } from './entities/alumni-card.entity';
 import { Repository } from 'typeorm';
@@ -18,9 +17,10 @@ export class AlumniCardService {
     private readonly mailService: MailService,
   ) {}
 
-  async requestAlumniCard(createAlumniCardDto: CreateAlumniCardDto) {
+  async requestAlumniCard(userId: number) {
     const alumniCard = await this.alumniCardRepository.findOne({
-      where: { user: { id: createAlumniCardDto.userId } },
+      where: { user: { id: userId } },
+      relations: { user: true },
     });
 
     if (alumniCard.isApproved) {
