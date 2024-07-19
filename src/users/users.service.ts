@@ -17,6 +17,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { constants } from '../../utils/constants';
 import * as path from 'path';
 import { Registration } from '../registrations/entities/registration.entity';
+import { AlumniCard } from '../alumni-card/entities/alumni-card.entity';
 
 enum RolesEnum {
   'Admin' = 1,
@@ -28,6 +29,8 @@ export class UserService {
   constructor(
     @InjectRepository(Profile) private profileRepository: Repository<Profile>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(AlumniCard)
+    private alumniCardRepository: Repository<AlumniCard>,
     @InjectRepository(Registration)
     private registrationRepository: Repository<Registration>,
     private fileHelper: FilesHelper,
@@ -47,6 +50,11 @@ export class UserService {
       timezone: 'Karachi',
     });
 
+    const newAlumniCard = this.alumniCardRepository.create({
+      user: createdUser,
+    });
+
+    await this.alumniCardRepository.save(newAlumniCard);
     await this.profileRepository.save(newProfile);
 
     if (!this.fileHelper.createAlumniFolder(createdUser))

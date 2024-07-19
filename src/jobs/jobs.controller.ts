@@ -26,6 +26,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { IAuthUser } from '../auth/types/auth-user.type';
 import { AuthUser } from '../auth/decorator/user.decorator';
 import { Serialize } from '../../utils/serialize.interceptor';
+import { SerializeAll } from '../../utils/serialize-all.interceptor';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -45,6 +46,7 @@ export class JobsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/approve')
+  @Serialize(JobDto)
   approve(
     @Body('id', ParseIntPipe) id: number,
     @AuthUser() currentUser: IAuthUser,
@@ -53,6 +55,7 @@ export class JobsController {
   }
 
   @Get()
+  @SerializeAll(JobDto)
   @ApiOkResponse({
     description: 'All Jobs',
     type: [Job],
@@ -62,6 +65,7 @@ export class JobsController {
   }
 
   @Get('/unapproved')
+  @SerializeAll(JobDto)
   @ApiOkResponse({
     description: 'All unapproved jobs',
     type: [Job],
@@ -71,6 +75,7 @@ export class JobsController {
   }
 
   @Get(':id')
+  @Serialize(JobDto)
   @ApiOkResponse({ description: 'Job with provided id', type: Job })
   @ApiNotFoundResponse({ description: 'Job with provided id not found' })
   findOne(@Param('id', ParseIntPipe) id: number) {

@@ -38,8 +38,8 @@ export class AlumniCardController {
     description: 'Alumni card is already requested',
   })
   @Serialize(AlumniCardDto)
-  create(@Body() createAlumniCardDto: CreateAlumniCardDto) {
-    return this.alumniCardService.create(createAlumniCardDto);
+  requestAlumniCard(@Body() createAlumniCardDto: CreateAlumniCardDto) {
+    return this.alumniCardService.requestAlumniCard(createAlumniCardDto);
   }
 
   @Get()
@@ -63,6 +63,11 @@ export class AlumniCardController {
   @Serialize(AlumniCardDto)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.alumniCardService.findOne(id);
+  }
+
+  @Get('/user/:userId')
+  findByUser(@Param('userId', ParseIntPipe) userId: number) {
+    return this.alumniCardService.findByUser(userId);
   }
 
   @Post('approve/:id')

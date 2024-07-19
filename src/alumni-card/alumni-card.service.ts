@@ -20,28 +20,24 @@ export class AlumniCardService {
     private readonly mailService: MailService,
   ) {}
 
-  async create(createAlumniCardDto: CreateAlumniCardDto) {
-    const user = await this.userRepository.findOne({
-      where: { id: createAlumniCardDto.userId },
-      relations: { alumni_card: true },
+  async requestAlumniCard(createAlumniCardDto: CreateAlumniCardDto) {
+    const alumniCard = await this.alumniCardRepository.findOne({
+      where: { user: { id: createAlumniCardDto.userId } },
     });
 
-    if (user.alumni_card && user.alumni_card.isApproved) {
+    if (alumniCard.isApproved) {
       throw new BadRequestException(
         'Alumni card is approved, collect it from alumni department',
       );
     }
 
-    if (user.alumni_card && user.alumni_card.isRequested) {
+    if (alumniCard.isRequested) {
       throw new UnprocessableEntityException(
         'Alumni card is already requested',
       );
     }
 
-    const alumniCard = this.alumniCardRepository.create({
-      user,
-      isRequested: true,
-    });
+    alumniCard.isRequested = true;
 
     return await this.alumniCardRepository.save(alumniCard);
   }
@@ -51,8 +47,10 @@ export class AlumniCardService {
       where: { id },
       relations: { user: true },
     });
+
     if (!alumniCard)
       throw new NotFoundException(`Alumni card with id '${id}' not found`);
+
     return alumniCard;
   }
 
@@ -61,6 +59,19 @@ export class AlumniCardService {
       where: { isRequested: true },
       relations: { user: true },
     });
+  }
+
+  async findByUser(userId: number) {
+    const alumniCard = await this.alumniCardRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (!alumniCard)
+      throw new NotFoundException(
+        `Alumni card with userId '${userId}' not found`,
+      );
+
+    return alumniCard;
   }
 
   async approve(id: number) {
