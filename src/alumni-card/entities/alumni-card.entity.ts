@@ -8,7 +8,7 @@ import {
 import { User } from '../../users/entities/users.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
-@Entity('alumni-card')
+@Entity('alumni_card')
 export class AlumniCard {
   @ApiProperty({ description: 'Id', example: '1' })
   @PrimaryGeneratedColumn()
