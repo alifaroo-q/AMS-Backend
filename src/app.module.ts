@@ -32,6 +32,7 @@ import { TestimonialModule } from './testimonial/testimonial.module';
 import { Testimonial } from './testimonial/entities/testimonial.entity';
 import { AlumniCardModule } from './alumni-card/alumni-card.module';
 import { AlumniCard } from './alumni-card/entities/alumni-card.entity';
+import { AppliedJob } from './jobs/entities/applied-job.entity';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { AlumniCard } from './alumni-card/entities/alumni-card.entity';
         CorporatePartner,
         Testimonial,
         AlumniCard,
+        AppliedJob,
       ],
       synchronize: true,
     }),

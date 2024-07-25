@@ -19,6 +19,7 @@ import {
 import { constants } from 'utils/constants';
 import { Testimonial } from '../../testimonial/entities/testimonial.entity';
 import { AlumniCard } from '../../alumni-card/entities/alumni-card.entity';
+import { AppliedJob } from '../../jobs/entities/applied-job.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -108,6 +109,9 @@ export class User {
 
   @OneToMany(() => Job, (job) => job.user)
   jobs: Job[];
+
+  @OneToMany(() => AppliedJob, (applied_job) => applied_job.user)
+  applied_jobs: AppliedJob[];
 
   @OneToOne(() => Testimonial, (testimony) => testimony.user)
   testimony: Testimonial;

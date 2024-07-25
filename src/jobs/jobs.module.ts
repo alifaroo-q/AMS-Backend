@@ -4,9 +4,10 @@ import { JobsController } from './jobs.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Job } from './entities/job.entity';
 import { User } from '../users/entities/users.entity';
+import { AppliedJob } from './entities/applied-job.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Job, User])],
+  imports: [TypeOrmModule.forFeature([Job, User, AppliedJob])],
   controllers: [JobsController],
   providers: [JobsService],
 })

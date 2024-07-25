@@ -1,7 +1,8 @@
 import {
+  BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
-  ForbiddenException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Job } from './entities/job.entity';
@@ -10,6 +11,7 @@ import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { User } from '../users/entities/users.entity';
 import { IAuthUser } from '../auth/types/auth-user.type';
+import { AppliedJob } from './entities/applied-job.entity';
 
 enum RolesEnum {
   'Admin' = 1,
@@ -21,6 +23,8 @@ export class JobsService {
   constructor(
     @InjectRepository(Job) private readonly jobRepository: Repository<Job>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(AppliedJob)
+    private readonly appliedJobRepository: Repository<AppliedJob>,
   ) {}
 
   async create(createJobDto: CreateJobDto, currentUser: IAuthUser) {
@@ -37,6 +41,33 @@ export class JobsService {
         : this.jobRepository.create({ ...createJobDto, user });
 
     return await this.jobRepository.save(job);
+  }
+
+  async applyForJob(jobId: number, currentUser: IAuthUser) {
+    if (currentUser.role !== RolesEnum.User)
+      throw new ForbiddenException('Only users can apply for job');
+
+    const appliedJob = await this.appliedJobRepository.findOneBy({
+      job: { id: jobId },
+      user: { id: currentUser.id },
+    });
+
+    if (appliedJob) {
+      throw new BadRequestException('Already applied for the job');
+    }
+
+    const job = await this.jobRepository.findOneBy({ id: jobId });
+    const user = await this.userRepository.findOneBy({ id: currentUser.id });
+
+    const newJobApplication = this.appliedJobRepository.create({ user, job });
+
+    return await this.appliedJobRepository.save(newJobApplication);
+  }
+
+  async findAppliedJobs(currentUser: IAuthUser) {
+    return await this.appliedJobRepository.findBy({
+      user: { id: currentUser.id },
+    });
   }
 
   async approve(currentUser: IAuthUser, id: number) {

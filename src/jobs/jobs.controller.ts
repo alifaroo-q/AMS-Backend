@@ -54,6 +54,21 @@ export class JobsController {
     return this.jobsService.approve(currentUser, id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('/apply/:jobId')
+  applyForJob(
+    @Param('jobId', ParseIntPipe) jobId: number,
+    @AuthUser() currentUser: IAuthUser,
+  ) {
+    return this.jobsService.applyForJob(jobId, currentUser);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/applied')
+  findAppliedJobs(@AuthUser() currentUser: IAuthUser) {
+    return this.jobsService.findAppliedJobs(currentUser);
+  }
+
   @Get()
   @SerializeAll(JobDto)
   @ApiOkResponse({
